@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AppBundleDotjsRouteImport } from './routes/app-bundle[.]js'
+import { Route as ApiProxySplatRouteImport } from './routes/api-proxy/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const AppBundleDotjsRoute = AppBundleDotjsRouteImport.update({
   path: '/app-bundle.js',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProxySplatRoute = ApiProxySplatRouteImport.update({
+  id: '/api-proxy/$',
+  path: '/api-proxy/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/app-bundle.js': typeof AppBundleDotjsRoute
+  '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/app-bundle.js': typeof AppBundleDotjsRoute
+  '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/app-bundle.js': typeof AppBundleDotjsRoute
+  '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$' | '/app-bundle.js'
+  fullPaths: '/' | '/$' | '/app-bundle.js' | '/api-proxy/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$' | '/app-bundle.js'
-  id: '__root__' | '/' | '/$' | '/app-bundle.js'
+  to: '/' | '/$' | '/app-bundle.js' | '/api-proxy/$'
+  id: '__root__' | '/' | '/$' | '/app-bundle.js' | '/api-proxy/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AppBundleDotjsRoute: typeof AppBundleDotjsRoute
+  ApiProxySplatRoute: typeof ApiProxySplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBundleDotjsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api-proxy/$': {
+      id: '/api-proxy/$'
+      path: '/api-proxy/$'
+      fullPath: '/api-proxy/$'
+      preLoaderRoute: typeof ApiProxySplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AppBundleDotjsRoute: AppBundleDotjsRoute,
+  ApiProxySplatRoute: ApiProxySplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -14,7 +14,7 @@ export const Route = createFileRoute("/app-bundle.js")({
         const apiBase = (
           process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
         ).replace(/\/+$/, "");
-        const body = bundleRaw.split(ORIGINAL_API_BASE).join(apiBase);
+        const body = bundleRaw.split(ORIGINAL_API_BASE).join("/api-proxy").split(apiBase).join("/api-proxy");
         return new Response(body, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
