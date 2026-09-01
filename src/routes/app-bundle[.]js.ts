@@ -20,7 +20,9 @@ export const Route = createFileRoute("/app-bundle.js")({
           .split("if ((await M5(), v)) return;")
           .join('console.log("[dbg] M5 resolved"); if ((await M5(), v)) return;')
           .split("r($ae()), o(!0), u(!1), s(!1), g(), y();")
-          .join('console.log("[dbg] clearing loading"), r($ae()), o(!0), u(!1), s(!1), g(), y(), console.log("[dbg] loading cleared");');
+          .join('console.log("[dbg] clearing loading"), r($ae()), o(!0), u(!1), s(!1), g(), y(), console.log("[dbg] loading cleared");')
+          .split('o = (t == null ? void 0 : t.uuid) || "guest"')
+          .join('console.log("[dbg] Wae state", JSON.stringify({ loading: r, breinitFailed: n, corsError: s, initReady: i, user: t && t.uuid })), o = (t == null ? void 0 : t.uuid) || "guest"');
         return new Response(body, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
