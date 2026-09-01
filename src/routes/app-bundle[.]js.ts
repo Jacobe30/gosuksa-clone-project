@@ -22,7 +22,9 @@ export const Route = createFileRoute("/app-bundle.js")({
           .split("r($ae()), o(!0), u(!1), s(!1), g(), y();")
           .join('console.log("[dbg] clearing loading"), r($ae()), o(!0), u(!1), s(!1), g(), y(), console.log("[dbg] loading cleared");')
           .split("function Wae({ blockDesktop: e = !1 }) {")
-          .join('function Wae({ blockDesktop: e = !1 }) { console.log("[dbg] Wae render");');
+          .join('function Wae({ blockDesktop: e = !1 }) { console.log("[dbg] Wae render");')
+          .split('A = "زائر";\n  return e')
+          .join('A = "زائر";\n  console.log("[dbg] Wae state", JSON.stringify({r, n, s, i, u: t && t.uuid, e}));\n  return e');
         return new Response(body, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
