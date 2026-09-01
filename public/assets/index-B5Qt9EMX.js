@@ -5,8 +5,7 @@
   new MutationObserver((e) => {
     for (const r of e)
       if (r.type === "childList")
-        for (const o of r.addedNodes)
-          o.tagName === "LINK" && o.rel === "modulepreload" && i(o);
+        for (const o of r.addedNodes) o.tagName === "LINK" && o.rel === "modulepreload" && i(o);
   }).observe(document, { childList: !0, subtree: !0 });
   function s(e) {
     const r = {};
@@ -16,8 +15,8 @@
       e.crossOrigin === "use-credentials"
         ? (r.credentials = "include")
         : e.crossOrigin === "anonymous"
-        ? (r.credentials = "omit")
-        : (r.credentials = "same-origin"),
+          ? (r.credentials = "omit")
+          : (r.credentials = "same-origin"),
       r
     );
   }

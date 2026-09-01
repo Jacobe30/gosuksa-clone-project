@@ -3,13 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 const DEFAULT_BACKEND = "https://jb-end-production.up.railway.app";
 
 function backendBase() {
-  return (process.env["VITE_BACKEND_WS_URL"] || DEFAULT_BACKEND).replace(
-    /\/+$/,
-    "",
-  );
+  return (process.env["VITE_BACKEND_WS_URL"] || DEFAULT_BACKEND).replace(/\/+$/, "");
 }
 
-async function proxy({ request, params }: any) {
+type ProxyArgs = { request: Request; params?: { _splat?: string } };
+
+async function proxy({ request, params }: ProxyArgs) {
   const splat = params._splat ?? "";
   const url = new URL(request.url);
 
@@ -47,6 +46,7 @@ async function proxy({ request, params }: any) {
   // `{ ok, _id, session }` instead, so adapt it here to the expected shape.
   if (splat.replace(/^\/+/, "") === "api/user/init" && res.ok) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = await res.json();
       if (!data?.userInfo?.uuid) {
         const reqBody =
@@ -90,7 +90,7 @@ export const Route = createFileRoute("/api-proxy/$")({
       PUT: proxy,
       PATCH: proxy,
       DELETE: proxy,
-      OPTIONS: async ({ request }: any) => {
+      OPTIONS: async ({ request }: ProxyArgs) => {
         const url = new URL(request.url);
         return new Response(null, {
           status: 204,
@@ -98,8 +98,7 @@ export const Route = createFileRoute("/api-proxy/$")({
             "access-control-allow-origin": url.origin,
             "access-control-allow-credentials": "true",
             "access-control-allow-headers": "*",
-            "access-control-allow-methods":
-              "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+            "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
             "access-control-max-age": "86400",
           },
         });

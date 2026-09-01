@@ -16,9 +16,10 @@ export const Route = createFileRoute("/app-bundle.js")({
   server: {
     handlers: {
       GET: () => {
-        const apiBase = (
-          process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
-        ).replace(/\/+$/, "");
+        const apiBase = (process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE).replace(
+          /\/+$/,
+          "",
+        );
         let body = bundleRaw
           .split(ORIGINAL_API_BASE)
           .join("/api-proxy")
