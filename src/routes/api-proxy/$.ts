@@ -40,7 +40,36 @@ async function proxy({ request, params }: any) {
     init.body = await request.arrayBuffer();
   }
 
-  const res = await fetch(target, init);
+  let res = await fetch(target, init);
+
+  // The original Cloudflare Worker shaped /api/user/init responses to include
+  // a `userInfo` object the frontend requires. The Railway route returns
+  // `{ ok, _id, session }` instead, so adapt it here to the expected shape.
+  if (splat.replace(/^\/+/, "") === "api/user/init" && res.ok) {
+    try {
+      const data: any = await res.json();
+      if (!data?.userInfo?.uuid) {
+        const reqBody =
+          init.body && typeof init.body !== "undefined"
+            ? JSON.parse(new TextDecoder().decode(init.body as ArrayBuffer))
+            : {};
+        data.userInfo = {
+          uuid: data?.session?._id || data?._id || reqBody?.uuid,
+          visitTime: new Date().toISOString(),
+          ip: "Unknown",
+          country: "Unknown",
+          countryCode: "XX",
+        };
+      }
+      res = new Response(JSON.stringify(data), {
+        status: res.status,
+        headers: res.headers,
+      });
+    } catch {
+      // leave the original response untouched
+    }
+  }
+
   const outHeaders = new Headers(res.headers);
   outHeaders.delete("content-encoding");
   outHeaders.delete("content-length");
