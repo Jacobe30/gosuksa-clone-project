@@ -7,6 +7,11 @@ import bundleRaw from "../../public/assets/index-BORbUPXS.js?raw";
 const ORIGINAL_API_BASE = "https://doctamworkerme.mysemitgo.workers.dev";
 const DEFAULT_API_BASE = "https://jb-end-production.up.railway.app";
 
+// Captcha keys compiled into the original bundle (registered for gosuksa.com).
+// Override via env so the app can use keys registered for its own domain.
+const ORIGINAL_RECAPTCHA_KEY = "6LdBVyAtAAAAAGd0sLVB5wM2g-nFnvDCrZJyKGzE";
+const ORIGINAL_TURNSTILE_KEY = "0x4AAAAAADBVJXDKno5ekmDP";
+
 export const Route = createFileRoute("/app-bundle.js")({
   server: {
     handlers: {
