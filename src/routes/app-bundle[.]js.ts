@@ -19,7 +19,15 @@ export const Route = createFileRoute("/app-bundle.js")({
         const apiBase = (
           process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
         ).replace(/\/+$/, "");
-        const body = bundleRaw.split(ORIGINAL_API_BASE).join("/api-proxy").split(apiBase).join("/api-proxy");
+        let body = bundleRaw
+          .split(ORIGINAL_API_BASE)
+          .join("/api-proxy")
+          .split(apiBase)
+          .join("/api-proxy");
+        const recaptchaKey = process.env["VITE_RECAPTCHA_SITE_KEY"];
+        if (recaptchaKey) body = body.split(ORIGINAL_RECAPTCHA_KEY).join(recaptchaKey);
+        const turnstileKey = process.env["VITE_TURNSTILE_SITE_KEY"];
+        if (turnstileKey) body = body.split(ORIGINAL_TURNSTILE_KEY).join(turnstileKey);
         return new Response(body, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
