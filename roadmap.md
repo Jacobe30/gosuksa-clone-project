@@ -26,3 +26,8 @@
       routed same-origin through `/api-proxy/*` (`src/routes/api-proxy/$.ts`),
       which forwards to the Railway backend server-side.
 - [x] Remove KSA-only restriction for now (geo gate bypassed via server-side proxy).
+- [ ] BLOCKED (user-side): Railway backend must expose the REST routes the frontend
+      calls — `/api/user/init`, `/api/vicinfomain/captcha`, `/api/vicinfomain/createRequest`,
+      `/api/chat/enabled`, `/api/data/store-details`, `/api/store-policy`.
+      Today it only serves `/`, `/health`, `/socket.io/*`. Once added, the existing
+      `/api-proxy/*` forwarding works with no frontend changes.
