@@ -12,6 +12,20 @@ function backendBase() {
 async function proxy({ request, params }: any) {
   const splat = params._splat ?? "";
   const url = new URL(request.url);
+
+  // The old Cloudflare Worker exposed /breinit as a startup gate (which also
+  // enforced the KSA-only geo restriction). The Railway backend has no such
+  // route, so answer it here without any geo restriction.
+  if (splat.replace(/^\/+/, "") === "breinit") {
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "no-store",
+        "access-control-allow-origin": url.origin,
+        "access-control-allow-credentials": "true",
+      },
+    });
+  }
   const target = `${backendBase()}/${splat}${url.search}`;
 
   const headers = new Headers(request.headers);
