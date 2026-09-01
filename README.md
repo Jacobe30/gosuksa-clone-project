@@ -4,7 +4,7 @@ Lovable AI Prompt — Clone My Existing Website
 
 I own the existing website:
 
-https://gosuksa.com/
+
 
 I want you to recreate/clone this website inside this Lovable project.
 
