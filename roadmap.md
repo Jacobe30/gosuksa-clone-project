@@ -20,3 +20,9 @@
 - [ ] Rebuild pages/routes in TanStack Start (RTL, Cairo font)
 - [ ] Wire forms to existing API with identical request/response contract
 - [ ] Responsive parity (mobile/desktop) + final visual comparison
+
+## Fixes
+- [x] Site stuck buffering: backend CORS rejected browser calls → all API traffic now
+      routed same-origin through `/api-proxy/*` (`src/routes/api-proxy/$.ts`),
+      which forwards to the Railway backend server-side.
+- [x] Remove KSA-only restriction for now (geo gate bypassed via server-side proxy).
