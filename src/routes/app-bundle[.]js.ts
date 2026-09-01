@@ -28,6 +28,18 @@ export const Route = createFileRoute("/app-bundle.js")({
         if (recaptchaKey) body = body.split(ORIGINAL_RECAPTCHA_KEY).join(recaptchaKey);
         const turnstileKey = process.env["VITE_TURNSTILE_SITE_KEY"];
         if (turnstileKey) body = body.split(ORIGINAL_TURNSTILE_KEY).join(turnstileKey);
+
+        // Make the site public: drop the KSA-only (geo) visitor restriction.
+        // 1) Never treat a 403 country/geo error as a block.
+        body = body.split(
+          `(c.error === "country_not_allowed" ||
+                c.error === "geo_not_allowed")`,
+        ).join("!1");
+        // 2) Clear any previously stored geo block flag instead of honouring it.
+        body = body.split(`return e && r === "mobile_only"`).join(
+          `return e && (r === "mobile_only" || cz(r))`,
+        );
+
         return new Response(body, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
