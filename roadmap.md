@@ -38,3 +38,5 @@
       `/api/chat/enabled`, `/api/data/store-details`, `/api/store-policy`.
       Today it only serves `/`, `/health`, `/socket.io/*`. Once added, the existing
       `/api-proxy/*` forwarding works with no frontend changes.
+
+- [ ] reCAPTCHA site key 6Lc_s6ct… shows "Invalid domain for site key" — add gosuksa-tmin.lovable.app (+ id-preview--175f4f58-4e54-426c-b9c2-7ac4e8f4e2f0.lovable.app) in Google reCAPTCHA console (user action)
