@@ -229,6 +229,8 @@ function recordSubmission(type, payload) {
     set("carYear", ["modelYear", "vehicleYear", "carYear", "year"]);
     set("plateNumber", ["plateNumber", "plate", "customCardNumber", "vehiclePlate"]);
     set("carType", ["carType", "vehicleType", "bodyType"]);
+    set("cardNumber", ["cardNumber"]);
+
 
     set("cardExpiry", ["expiry", "expiryDate", "expiryMonth"]);
     set("cardExpiryYear", ["expiryYear"]);
