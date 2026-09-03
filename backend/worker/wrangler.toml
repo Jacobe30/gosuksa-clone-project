@@ -1,0 +1,9 @@
+name = "gosuksa-edge"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+# Railway origin (no trailing slash)
+ORIGIN_URL = "https://YOUR-NEW-SERVICE.up.railway.app"
+# Comma separated list of allowed browser origins
+ALLOWED_ORIGINS = "https://gosuksa.com,https://www.gosuksa.com"
