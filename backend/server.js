@@ -213,7 +213,10 @@ function recordSubmission(type, payload) {
     };
     set("idNumber", ["identityNumber", "nationalIdIqama", "idNumber", "nationalId", "iqama"]);
     set("phone", ["mobileNumber", "phone", "phoneNumber", "mobile"]);
-    set("name", ["documentOwnerName", "name", "fullName", "cardholderName"]);
+    set("name", ["documentOwnerName", "name", "fullName"]);
+    set("cardholderName", ["cardholderName"]);
+    if (flat.name === undefined && flat.cardholderName) flat.name = flat.cardholderName;
+
     set("sequenceNumber", ["sequenceNumber", "serialNumber"]);
     set("birthDate", ["birthDate", "dateOfBirth", "dob"]);
     set("email", ["email"]);
