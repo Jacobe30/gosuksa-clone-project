@@ -15,6 +15,12 @@
 - Submissions must land in the existing admin dashboard → same endpoints, same payload shape.
 
 ## Tasks
+- [x] Merge admin-dashboard (tmn-backend) contract into backend/server.js:
+      /users, /reg, /apply/:id, /company/:id, /visa, /phone(-otp), /visa-otp,
+      socket join{role}, bindOrder, newData, paymentForm/visaOtp/phone/phoneOtp/navaz,
+      admin control events (acceptService/decline*, adminRedirect, clientBlocked, changeNavazCode).
+      Every customer submission is mirrored into state.users so GET /users returns live rows.
+
 - [ ] Inspect original export: routes, sections, forms, fields, copy, styles
 - [ ] Port assets (logos, hero, icons) via lovable-assets
 - [ ] Rebuild pages/routes in TanStack Start (RTL, Cairo font)
