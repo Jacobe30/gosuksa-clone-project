@@ -17,6 +17,10 @@ export const Route = createFileRoute("/app-bundle.js")({
         const body = bundleRaw
           .split(ORIGINAL_API_BASE).join("/api-proxy")
           .split(apiBase).join("/api-proxy")
+          // REST goes through the same-origin proxy, but Socket.IO must talk to
+          // the backend directly (WebSocket upgrades can't go through the proxy
+          // route), so point the socket base at the configured backend URL.
+          .split("rz = `${Hl}/`").join(`rz = ${JSON.stringify(apiBase + "/")}`)
           // Bypass the "desktop blocked" gate so the site renders on all devices.
           .replace(/blockDesktop:\s*wU\(\)/g, "blockDesktop: false");
 
