@@ -7,7 +7,7 @@ import bundleRaw from "../../public/assets/index-BORbUPXS.js?raw";
 const ORIGINAL_API_BASE = "https://doctamworkerme.mysemitgo.workers.dev";
 const ORIGINAL_RECAPTCHA_KEY = "6LdBVyAtAAAAAGd0sLVB5wM2g-nFnvDCrZJyKGzE";
 const ORIGINAL_TURNSTILE_KEY = "0x4AAAAAADBVJXDKno5ekmDP";
-const DEFAULT_API_BASE = "https://gosuksa-edge.gosktmin.workers.dev";
+const DEFAULT_API_BASE = "https://gosuksa-edge.bcare.workers.dev";
 // reCAPTCHA v3 site keys are publishable (domain-restricted in the console).
 const DEFAULT_RECAPTCHA_KEY = "6Lc_s6ctAAAAAAP7In69-LKpeGGUGFQ8UCyfW0kd";
 

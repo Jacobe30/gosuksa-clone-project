@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const DEFAULT_BACKEND = "https://gosuksa-edge.gosktmin.workers.dev";
+const DEFAULT_BACKEND = "https://gosuksa-edge.bcare.workers.dev";
 
 function backendBase() {
   return (process.env["VITE_BACKEND_WS_URL"] || DEFAULT_BACKEND).replace(
