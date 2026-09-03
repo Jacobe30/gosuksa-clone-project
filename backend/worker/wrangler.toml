@@ -3,7 +3,5 @@ main = "src/index.js"
 compatibility_date = "2024-11-01"
 
 [vars]
-# Railway origin (no trailing slash)
-ORIGIN_URL = "https://YOUR-NEW-SERVICE.up.railway.app"
-# Comma separated list of allowed browser origins
+ORIGIN_URL = "https://jbackend-production-dc1b.up.railway.app"
 ALLOWED_ORIGINS = "https://gosuksa.com,https://www.gosuksa.com"
