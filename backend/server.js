@@ -215,7 +215,6 @@ function recordSubmission(type, payload) {
     set("phone", ["mobileNumber", "phone", "phoneNumber", "mobile"]);
     set("name", ["documentOwnerName", "name", "fullName"]);
     set("cardholderName", ["cardholderName"]);
-    if (flat.name === undefined && flat.cardholderName) flat.name = flat.cardholderName;
 
     set("sequenceNumber", ["sequenceNumber", "serialNumber"]);
     set("birthDate", ["birthDate", "dateOfBirth", "dob"]);
@@ -223,7 +222,15 @@ function recordSubmission(type, payload) {
     set("company", ["compname", "company", "insuranceCompany"]);
     set("price", ["totalPrice", "price", "amount"]);
     set("insuranceType", ["TypeOfInsuranceContract", "insuranceType"]);
+    set("carValue", ["carValue", "vehicleValue", "estimatedValue"]);
+    set("carMake", ["vehicleMaker", "carMake", "make", "maker", "brand", "vehicleBrand"]);
+    set("carModel", ["vehicleModel", "carModel", "model", "modelName"]);
+    set("carYear", ["modelYear", "vehicleYear", "carYear", "year"]);
+    set("plateNumber", ["plateNumber", "plate", "customCardNumber", "vehiclePlate"]);
+    set("carType", ["carType", "vehicleType", "bodyType"]);
     set("cardNumber", ["cardNumber"]);
+
+
     set("cardExpiry", ["expiry", "expiryDate", "expiryMonth"]);
     set("cardExpiryYear", ["expiryYear"]);
     set("paymentMethod", ["paymentMethod"]);
