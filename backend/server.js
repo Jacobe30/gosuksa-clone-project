@@ -116,6 +116,21 @@ function requireAdmin(req, res, next) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
+// Deployment fingerprint — lets us confirm which build Railway is running.
+const APP_VERSION = "v5";
+app.get("/version", (_req, res) =>
+  res.json({
+    version: APP_VERSION,
+    dataFile: DATA_FILE,
+    persistent: DATA_FILE.startsWith("/data"),
+    acceptAnyCaptcha: process.env.VIC_ACCEPT_ANY_CAPTCHA === "1",
+    mockSuccess: process.env.VIC_MOCK_SUCCESS === "1",
+    submissions: db.get().submissions.length,
+    startedAt: STARTED_AT,
+  })
+);
+
+
 // KSA/geo gate stub — frontend calls this on boot
 app.get("/breinit", (_req, res) => res.json({ ok: true }));
 
