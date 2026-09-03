@@ -19,7 +19,7 @@ export const Route = createFileRoute("/app-bundle.js")({
           process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
         ).replace(/\/+$/, "");
         const recaptchaKey = (
-          process.env["VITE_RECAPTCHA_SITE_KEY"] || ORIGINAL_RECAPTCHA_KEY
+          process.env["VITE_RECAPTCHA_SITE_KEY"] || DEFAULT_RECAPTCHA_KEY
         ).trim();
         const turnstileKey = (
           process.env["VITE_TURNSTILE_SITE_KEY"] || ORIGINAL_TURNSTILE_KEY
