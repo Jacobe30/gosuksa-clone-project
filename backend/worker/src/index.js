@@ -7,12 +7,73 @@ const NO_CACHE = {
   Expires: "0",
 };
 
-function allowedOrigins(env) {
-  return (env.ALLOWED_ORIGINS || "")
+// Workers have no startup hook, so config is validated once on the first
+// request of each isolate and the result is cached. Bad config fails fast
+// with 500 instead of silently breaking CORS or captcha verification.
+let configCache = null;
+
+function validateEnv(env) {
+  if (configCache) return configCache;
+  const errors = [];
+
+  // ORIGIN_URL — required, must be an absolute http(s) URL.
+  let originUrl = null;
+  if (!env.ORIGIN_URL || !String(env.ORIGIN_URL).trim()) {
+    errors.push("ORIGIN_URL is missing");
+  } else {
+    try {
+      originUrl = new URL(String(env.ORIGIN_URL).trim());
+      if (!/^https?:$/.test(originUrl.protocol)) {
+        errors.push("ORIGIN_URL must start with http:// or https://");
+      }
+    } catch {
+      errors.push(`ORIGIN_URL is malformed: ${env.ORIGIN_URL}`);
+    }
+  }
+
+  // ALLOWED_ORIGINS — required, comma separated list of scheme+host origins.
+  const origins = String(env.ALLOWED_ORIGINS || "")
     .split(",")
-    .map((origin) => origin.trim())
+    .map((value) => value.trim())
     .filter(Boolean);
+
+  if (origins.length === 0) {
+    errors.push("ALLOWED_ORIGINS is missing or empty");
+  }
+  for (const candidate of origins) {
+    try {
+      const parsed = new URL(candidate);
+      if (!/^https?:$/.test(parsed.protocol)) {
+        errors.push(`ALLOWED_ORIGINS entry must be http(s): ${candidate}`);
+      } else if (parsed.origin !== candidate.replace(/\/$/, "")) {
+        errors.push(
+          `ALLOWED_ORIGINS entry must be a bare origin with no path or trailing slash: ${candidate}`,
+        );
+      }
+    } catch {
+      errors.push(`ALLOWED_ORIGINS entry is malformed: ${candidate}`);
+    }
+  }
+
+  // RECAPTCHA_SECRET — required, Google secrets look like "6L..." (40 chars).
+  const secret = String(env.RECAPTCHA_SECRET || "").trim();
+  if (!secret) {
+    errors.push("RECAPTCHA_SECRET is missing (wrangler secret put RECAPTCHA_SECRET)");
+  } else if (!/^6[0-9A-Za-z_-]{20,}$/.test(secret)) {
+    errors.push("RECAPTCHA_SECRET is malformed (expected a Google reCAPTCHA secret starting with 6)");
+  }
+
+  configCache = { errors, origins, originUrl };
+  if (errors.length) {
+    console.error("Worker configuration invalid:\n - " + errors.join("\n - "));
+  }
+  return configCache;
 }
+
+function allowedOrigins(env) {
+  return validateEnv(env).origins;
+}
+
 
 function corsHeaders(request, env) {
   const origin = request.headers.get("Origin");
