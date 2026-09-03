@@ -43,6 +43,7 @@ const cors = require("cors");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const { newCaptcha } = require("./captcha");
 const { Server } = require("socket.io");
 
 // ---------- config ----------
@@ -125,8 +126,7 @@ app.get("/version", (_req, res) =>
     version: APP_VERSION,
     dataFile: DATA_FILE,
     persistent: DATA_FILE.startsWith("/data"),
-    acceptAnyCaptcha: process.env.VIC_ACCEPT_ANY_CAPTCHA === "1",
-    mockSuccess: process.env.VIC_MOCK_SUCCESS === "1",
+    vicUpstream: !!process.env.VIC_UPSTREAM_URL,
     submissions: db.get().submissions.length,
     startedAt: STARTED_AT,
   })
@@ -169,21 +169,17 @@ app.post("/api/user/init", (req, res) => {
 app.post("/api/chat/enabled", (_req, res) => res.json({ isChatEnabled: CHAT_ENABLED }));
 
 // ---------- Vehicle Info Main (VIC) captcha + lookup ----------
-// This is a real 3rd-party integration on gosuksa. Here we implement a
-// working stub: we generate our own numeric captcha and, on createRequest,
-// return a mock "vehicle_not_found" unless VIC_MOCK_SUCCESS=1, in which
-// case we return a canned vehicle. Replace with your real VIC provider call.
+// The captcha image is generated here (real, readable PNG) and validated on
+// createRequest. The vehicle lookup is forwarded to the real provider when
+// VIC_UPSTREAM_URL is set; otherwise the request is recorded as
+// vehicle_not_found. No mock data is ever returned.
 app.get("/api/vicinfomain/captcha", (_req, res) => {
   const sessionId = uuid();
   const captchaUuid = uuid();
-  const code = String(Math.floor(1000 + Math.random() * 9000));
-  // 1x1 gray PNG placeholder (replace with a real captcha image generator, e.g. `canvas`)
-  const imageB64 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  const { code, imageB64 } = newCaptcha();
   const state = db.get();
   state.captchas[sessionId] = { captchaUuid, code, ts: Date.now() };
   db.save();
-  console.log(`[captcha] sessionId=${sessionId} code=${code}`);
   res.json({
     sessionId,
     captchaUuid,
@@ -192,7 +188,7 @@ app.get("/api/vicinfomain/captcha", (_req, res) => {
   });
 });
 
-app.post("/api/vicinfomain/createRequest", (req, res) => {
+app.post("/api/vicinfomain/createRequest", async (req, res) => {
   const body = req.body || {};
   const {
     jcaptcha,
@@ -220,26 +216,35 @@ app.post("/api/vicinfomain/createRequest", (req, res) => {
     recordSubmission("vehicleRequest", { ...baseSubmission, result: "invalid_captcha" });
     return res.json({ status: "invalid_captcha", errorCode: "invalid_captcha" });
   }
-  // Accept either the real code we generated or bypass in dev
-  if (process.env.VIC_ACCEPT_ANY_CAPTCHA !== "1" && String(jcaptcha) !== c.code) {
+  if (String(jcaptcha).trim() !== c.code) {
     recordSubmission("vehicleRequest", { ...baseSubmission, result: "invalid_captcha" });
     return res.json({ status: "invalid_captcha", errorCode: "invalid_captcha" });
   }
   delete state.captchas[vicinfomainSessionId];
   db.save();
 
-  // Plug your real VIC lookup here using `sequenceNumber`.
-  if (process.env.VIC_MOCK_SUCCESS === "1") {
-    const vehicle = {
-      vehicleMaker: "TOYOTA",
-      vehicleModel: "CAMRY",
-      modelYear: "2022",
-      vin: "JT2BF22K1W0000000",
-      customId: sequenceNumber,
-      plateInfo: null,
-    };
-    recordSubmission("vehicleRequest", { ...baseSubmission, result: "success", vehicle });
-    return res.json({ status: "success", vehicle });
+  // Real VIC lookup: forwarded to the upstream provider when configured.
+  if (process.env.VIC_UPSTREAM_URL) {
+    try {
+      const r = await fetch(process.env.VIC_UPSTREAM_URL, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(process.env.VIC_UPSTREAM_TOKEN
+            ? { authorization: `Bearer ${process.env.VIC_UPSTREAM_TOKEN}` }
+            : {}),
+        },
+        body: JSON.stringify({ sequenceNumber, identityNumber: baseSubmission.identityNumber }),
+      });
+      const data = await r.json().catch(() => null);
+      const vehicle = data?.vehicle || (data && data.vehicleMaker ? data : null);
+      if (r.ok && vehicle) {
+        recordSubmission("vehicleRequest", { ...baseSubmission, result: "success", vehicle });
+        return res.json({ status: "success", vehicle });
+      }
+    } catch (e) {
+      console.warn("[vic] upstream lookup failed:", e.message);
+    }
   }
   recordSubmission("vehicleRequest", { ...baseSubmission, result: "vehicle_not_found" });
   return res.json({ status: "vehicle_not_found", errorCode: "vehicle_not_found" });
