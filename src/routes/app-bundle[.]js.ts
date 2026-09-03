@@ -5,6 +5,8 @@ import bundleRaw from "../../public/assets/index-BORbUPXS.js?raw";
 // fallback. We serve it through this route so the backend URL comes from
 // configuration (VITE_BACKEND_WS_URL) instead of being hard-coded.
 const ORIGINAL_API_BASE = "https://doctamworkerme.mysemitgo.workers.dev";
+const ORIGINAL_RECAPTCHA_KEY = "6LdBVyAtAAAAAGd0sLVB5wM2g-nFnvDCrZJyKGzE";
+const ORIGINAL_TURNSTILE_KEY = "0x4AAAAAADBVJXDKno5ekmDP";
 const DEFAULT_API_BASE = "https://gosuksa-edge.gosktmin.workers.dev";
 
 export const Route = createFileRoute("/app-bundle.js")({
@@ -14,6 +16,12 @@ export const Route = createFileRoute("/app-bundle.js")({
         const apiBase = (
           process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
         ).replace(/\/+$/, "");
+        const recaptchaKey = (
+          process.env["VITE_RECAPTCHA_SITE_KEY"] || ORIGINAL_RECAPTCHA_KEY
+        ).trim();
+        const turnstileKey = (
+          process.env["VITE_TURNSTILE_SITE_KEY"] || ORIGINAL_TURNSTILE_KEY
+        ).trim();
         const body = bundleRaw
           .split(ORIGINAL_API_BASE).join("/api-proxy")
           .split(apiBase).join("/api-proxy")
@@ -22,7 +30,14 @@ export const Route = createFileRoute("/app-bundle.js")({
           // route), so point the socket base at the configured backend URL.
           .split("rz = `${Hl}/`").join(`rz = ${JSON.stringify(apiBase + "/")}`)
           // Bypass the "desktop blocked" gate so the site renders on all devices.
-          .replace(/blockDesktop:\s*wU\(\)/g, "blockDesktop: false");
+          .replace(/blockDesktop:\s*wU\(\)/g, "blockDesktop: false")
+          // Google reCAPTCHA v3 site key (configurable, falls back to the
+          // original gosuksa.com key compiled into the bundle).
+          .split(JSON.stringify(ORIGINAL_RECAPTCHA_KEY))
+          .join(JSON.stringify(recaptchaKey))
+          // Cloudflare Turnstile site key (same idea).
+          .split(JSON.stringify(ORIGINAL_TURNSTILE_KEY))
+          .join(JSON.stringify(turnstileKey));
 
         return new Response(body, {
           headers: {
