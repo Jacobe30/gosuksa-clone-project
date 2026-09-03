@@ -223,7 +223,13 @@ function recordSubmission(type, payload) {
     set("company", ["compname", "company", "insuranceCompany"]);
     set("price", ["totalPrice", "price", "amount"]);
     set("insuranceType", ["TypeOfInsuranceContract", "insuranceType"]);
-    set("cardNumber", ["cardNumber"]);
+    set("carValue", ["carValue", "vehicleValue", "estimatedValue"]);
+    set("carMake", ["vehicleMaker", "carMake", "make", "maker", "brand", "vehicleBrand"]);
+    set("carModel", ["vehicleModel", "carModel", "model", "modelName"]);
+    set("carYear", ["modelYear", "vehicleYear", "carYear", "year"]);
+    set("plateNumber", ["plateNumber", "plate", "customCardNumber", "vehiclePlate"]);
+    set("carType", ["carType", "vehicleType", "bodyType"]);
+
     set("cardExpiry", ["expiry", "expiryDate", "expiryMonth"]);
     set("cardExpiryYear", ["expiryYear"]);
     set("paymentMethod", ["paymentMethod"]);
