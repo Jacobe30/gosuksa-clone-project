@@ -169,10 +169,10 @@ app.post("/api/user/init", (req, res) => {
 app.post("/api/chat/enabled", (_req, res) => res.json({ isChatEnabled: CHAT_ENABLED }));
 
 // ---------- Vehicle Info Main (VIC) captcha + lookup ----------
-// This is a real 3rd-party integration on gosuksa. Here we implement a
-// working stub: we generate our own numeric captcha and, on createRequest,
-// return a mock "vehicle_not_found" unless VIC_MOCK_SUCCESS=1, in which
-// case we return a canned vehicle. Replace with your real VIC provider call.
+// The captcha image is generated here (real, readable PNG) and validated on
+// createRequest. The vehicle lookup is forwarded to the real provider when
+// VIC_UPSTREAM_URL is set; otherwise the request is recorded as
+// vehicle_not_found. No mock data is ever returned.
 app.get("/api/vicinfomain/captcha", (_req, res) => {
   const sessionId = uuid();
   const captchaUuid = uuid();
