@@ -31,8 +31,6 @@ export const Route = createFileRoute("/app-bundle.js")({
           // the backend directly (WebSocket upgrades can't go through the proxy
           // route), so point the socket base at the configured backend URL.
           .split("rz = `${Hl}/`").join(`rz = ${JSON.stringify(apiBase + "/")}`)
-          // Bypass the "desktop blocked" gate so the site renders on all devices.
-          .replace(/blockDesktop:\s*wU\(\)/g, "blockDesktop: false")
           // Google reCAPTCHA v3 site key (configurable, falls back to the
           // original gosuksa.com key compiled into the bundle).
           .split(JSON.stringify(ORIGINAL_RECAPTCHA_KEY))
