@@ -77,6 +77,7 @@ const db = (() => {
   return {
     get: () => state,
     save: () => { dirty = true; },
+    flush: () => { dirty = false; try { fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2)); } catch (e) { console.warn("db save failed:", e.message); } },
   };
 })();
 
@@ -95,6 +96,7 @@ const io = new Server(server, {
 
 // ---------- helpers ----------
 const now = () => new Date().toISOString();
+const STARTED_AT = new Date().toISOString();
 const uuid = () => crypto.randomUUID();
 
 function clientIp(req) {
@@ -280,7 +282,8 @@ function recordSubmission(type, payload) {
   const state = db.get();
   const entry = { id: uuid(), type, uuid: payload?.uuid || payload?.userId || null, ts: now(), payload };
   state.submissions.push(entry);
-  db.save();
+  db.flush();
+  console.log(`[submission] ${type} ${entry.payload?.result || ""} total=${state.submissions.length}`);
   io.to("admins").emit("live:update", entry);
   return entry;
 }
