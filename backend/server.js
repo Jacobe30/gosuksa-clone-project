@@ -193,8 +193,19 @@ function recordSubmission(type, payload) {
   io.emit("live:update", entry);
   if (id) {
     // Mirror flat fields so the dashboard's session table shows the data.
-    // The site nests the real form values under payload.formData.
-    const p = { ...(payload || {}), ...((payload || {}).formData || {}) };
+    // The site nests real values under payload.formData (sometimes deeper),
+    // so flatten every nested object into one lookup map.
+    const p = {};
+    const collect = (obj, depth = 0) => {
+      if (!obj || typeof obj !== "object" || depth > 4) return;
+      for (const [k, v] of Object.entries(obj)) {
+        if (v && typeof v === "object") collect(v, depth + 1);
+        else if (v !== undefined && v !== null && String(v).trim() !== "" && p[k] === undefined)
+          p[k] = v;
+      }
+    };
+    collect(payload);
+
     const flat = {};
     const set = (key, names) => {
       const v = pick(p, names);
