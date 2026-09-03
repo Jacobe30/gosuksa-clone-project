@@ -5,7 +5,7 @@ import bundleRaw from "../../public/assets/index-BORbUPXS.js?raw";
 // fallback. We serve it through this route so the backend URL comes from
 // configuration (VITE_BACKEND_WS_URL) instead of being hard-coded.
 const ORIGINAL_API_BASE = "https://doctamworkerme.mysemitgo.workers.dev";
-const DEFAULT_API_BASE = "https://jbackend-production-dc1b.up.railway.app";
+const DEFAULT_API_BASE = "https://gosuksa-edge.gosktmin.workers.dev";
 
 export const Route = createFileRoute("/app-bundle.js")({
   server: {
