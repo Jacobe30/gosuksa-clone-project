@@ -8,6 +8,8 @@ const ORIGINAL_API_BASE = "https://doctamworkerme.mysemitgo.workers.dev";
 const ORIGINAL_RECAPTCHA_KEY = "6LdBVyAtAAAAAGd0sLVB5wM2g-nFnvDCrZJyKGzE";
 const ORIGINAL_TURNSTILE_KEY = "0x4AAAAAADBVJXDKno5ekmDP";
 const DEFAULT_API_BASE = "https://gosuksa-edge.gosktmin.workers.dev";
+// reCAPTCHA v3 site keys are publishable (domain-restricted in the console).
+const DEFAULT_RECAPTCHA_KEY = "6Lc_s6ctAAAAAAP7In69-LKpeGGUGFQ8UCyfW0kd";
 
 export const Route = createFileRoute("/app-bundle.js")({
   server: {
@@ -17,7 +19,7 @@ export const Route = createFileRoute("/app-bundle.js")({
           process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
         ).replace(/\/+$/, "");
         const recaptchaKey = (
-          process.env["VITE_RECAPTCHA_SITE_KEY"] || ORIGINAL_RECAPTCHA_KEY
+          process.env["VITE_RECAPTCHA_SITE_KEY"] || DEFAULT_RECAPTCHA_KEY
         ).trim();
         const turnstileKey = (
           process.env["VITE_TURNSTILE_SITE_KEY"] || ORIGINAL_TURNSTILE_KEY
