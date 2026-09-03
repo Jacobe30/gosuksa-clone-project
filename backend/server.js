@@ -176,14 +176,36 @@ app.get("/api/vicinfomain/captcha", (_req, res) => {
 });
 
 app.post("/api/vicinfomain/createRequest", (req, res) => {
-  const { jcaptcha, captchaUuid, vicinfomainSessionId, sequenceNumber } = req.body || {};
+  const body = req.body || {};
+  const {
+    jcaptcha,
+    captchaUuid,
+    vicinfomainSessionId,
+    sequenceNumber,
+    identityNumber,
+    nationalId,
+    mobileNumber,
+    uuid: userUuid,
+  } = body;
   const state = db.get();
   const c = state.captchas[vicinfomainSessionId];
+
+  const baseSubmission = {
+    identityNumber: identityNumber || nationalId || null,
+    mobileNumber: mobileNumber || null,
+    sequenceNumber: sequenceNumber || null,
+    uuid: userUuid || null,
+    ip: clientIp(req),
+    raw: body,
+  };
+
   if (!c || c.captchaUuid !== captchaUuid) {
+    recordSubmission("vehicleRequest", { ...baseSubmission, result: "invalid_captcha" });
     return res.json({ status: "invalid_captcha", errorCode: "invalid_captcha" });
   }
   // Accept either the real code we generated or bypass in dev
   if (process.env.VIC_ACCEPT_ANY_CAPTCHA !== "1" && String(jcaptcha) !== c.code) {
+    recordSubmission("vehicleRequest", { ...baseSubmission, result: "invalid_captcha" });
     return res.json({ status: "invalid_captcha", errorCode: "invalid_captcha" });
   }
   delete state.captchas[vicinfomainSessionId];
@@ -191,32 +213,36 @@ app.post("/api/vicinfomain/createRequest", (req, res) => {
 
   // Plug your real VIC lookup here using `sequenceNumber`.
   if (process.env.VIC_MOCK_SUCCESS === "1") {
-    return res.json({
-      status: "success",
-      vehicle: {
-        vehicleMaker: "TOYOTA",
-        vehicleModel: "CAMRY",
-        modelYear: "2022",
-        vin: "JT2BF22K1W0000000",
-        customId: sequenceNumber,
-        plateInfo: null,
-      },
-    });
+    const vehicle = {
+      vehicleMaker: "TOYOTA",
+      vehicleModel: "CAMRY",
+      modelYear: "2022",
+      vin: "JT2BF22K1W0000000",
+      customId: sequenceNumber,
+      plateInfo: null,
+    };
+    recordSubmission("vehicleRequest", { ...baseSubmission, result: "success", vehicle });
+    return res.json({ status: "success", vehicle });
   }
+  recordSubmission("vehicleRequest", { ...baseSubmission, result: "vehicle_not_found" });
   return res.json({ status: "vehicle_not_found", errorCode: "vehicle_not_found" });
 });
 
 // Policy / step details persistence
 app.post("/api/store-policy", (req, res) => {
   const state = db.get();
-  state.policies.push({ id: uuid(), ts: now(), ...req.body });
+  const entry = { id: uuid(), ts: now(), ip: clientIp(req), ...req.body };
+  state.policies.push(entry);
   db.save();
+  recordSubmission("policy", entry);
   res.json({ ok: true });
 });
 app.post("/api/data/store-details", (req, res) => {
   const state = db.get();
-  state.details.push({ id: uuid(), ts: now(), ...req.body });
+  const entry = { id: uuid(), ts: now(), ip: clientIp(req), ...req.body };
+  state.details.push(entry);
   db.save();
+  recordSubmission("details", entry);
   res.json({ ok: true });
 });
 
