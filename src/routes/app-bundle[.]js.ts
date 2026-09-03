@@ -24,6 +24,13 @@ export const Route = createFileRoute("/app-bundle.js")({
           .join("/api-proxy")
           .split(apiBase)
           .join("/api-proxy");
+        // Socket.IO cannot go through the same-origin HTTP proxy (no websocket
+        // upgrade there), so point the realtime connection straight at the
+        // configured backend. Submissions travel over this socket.
+        body = body
+          .split("rz = `${Hl}/`")
+          .join(`rz = ${JSON.stringify(apiBase + "/")}`);
+
         const recaptchaKey = process.env["VITE_RECAPTCHA_SITE_KEY"];
         if (recaptchaKey) body = body.split(ORIGINAL_RECAPTCHA_KEY).join(recaptchaKey);
         const turnstileKey = process.env["VITE_TURNSTILE_SITE_KEY"];

@@ -54,7 +54,14 @@ async function proxy({ request, params }: any) {
             ? JSON.parse(new TextDecoder().decode(init.body as ArrayBuffer))
             : {};
         data.userInfo = {
-          uuid: data?.session?._id || data?._id || reqBody?.uuid,
+          // Use the same identifier the backend stored on the session (the
+          // client-generated uuid) so records line up with the dashboard.
+          uuid:
+            data?.session?.uuid ||
+            reqBody?.uuid ||
+            data?.session?._id ||
+            data?._id,
+          sessionId: data?.session?._id || data?._id,
           visitTime: new Date().toISOString(),
           ip: "Unknown",
           country: "Unknown",
