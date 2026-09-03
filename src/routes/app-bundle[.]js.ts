@@ -40,6 +40,11 @@ export const Route = createFileRoute("/app-bundle.js")({
           `return e && (r === "mobile_only" || cz(r))`,
         );
 
+        // 3) Allow desktop visitors: disable the mobile-only device gate.
+        body = body
+          .split(`a.jsx(Wae, { blockDesktop: wU() })`)
+          .join(`a.jsx(Wae, { blockDesktop: !1 })`);
+
         return new Response(body, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
