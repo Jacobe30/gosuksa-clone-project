@@ -32,8 +32,8 @@ async function proxy({ request, params }: any) {
   headers.delete("host");
   headers.delete("content-length");
   headers.delete("accept-encoding");
-  headers.set("origin", "https://gosuksa.com");
-  headers.set("referer", "https://gosuksa.com/");
+  headers.set("origin", "https://gosuksa-tmin.lovable.app");
+  headers.set("referer", "https://gosuksa-tmin.lovable.app/");
 
   const init: RequestInit = { method: request.method, headers, redirect: "manual" };
   let bodyBuf: ArrayBuffer | null = null;
