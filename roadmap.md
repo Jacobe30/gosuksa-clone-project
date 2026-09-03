@@ -28,6 +28,8 @@
 - [x] Remove KSA-only restriction for now (geo gate bypassed via server-side proxy).
 - [x] Remove mobile-only gate: bundle blocked desktop (`blockDesktop: wU()`), patched to
       `false` in `src/routes/app-bundle[.]js.ts` so the site renders on all devices.
+- [x] Worker ops: deploy README, npm scripts (login/deploy/tail/secret/verify),
+      fail-fast env validation (ORIGIN_URL, ALLOWED_ORIGINS, RECAPTCHA_SECRET)
 - [x] Proxy fills in the missing `userInfo` block on `/api/user/init` responses so the
       app passes startup (backend currently returns only `{ok,_id,session}`).
 
