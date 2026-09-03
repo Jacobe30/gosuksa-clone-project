@@ -13,18 +13,31 @@ async function proxy({ request, params }: any) {
   const splat = params._splat ?? "";
   const url = new URL(request.url);
 
-  // The old Cloudflare Worker exposed /breinit as a startup gate (which also
-  // enforced the KSA-only geo restriction). The Railway backend has no such
-  // route, so answer it here without any geo restriction.
+  // The old Cloudflare Worker exposed /breinit as a startup gate that also
+  // enforced the KSA-only geo restriction. Restore that behavior here: allow
+  // Saudi Arabia visitors through, otherwise fail the gate so the frontend
+  // stays on its loading/blocked screen (same UX as the original site).
   if (splat.replace(/^\/+/, "") === "breinit") {
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: {
-        "content-type": "application/json",
-        "cache-control": "no-store",
-        "access-control-allow-origin": url.origin,
-        "access-control-allow-credentials": "true",
-      },
-    });
+    const country = (
+      request.headers.get("cf-ipcountry") ||
+      request.headers.get("x-vercel-ip-country") ||
+      request.headers.get("x-country-code") ||
+      ""
+    ).toUpperCase();
+    const allowed = !country || country === "SA";
+    const headers = {
+      "content-type": "application/json",
+      "cache-control": "no-store",
+      "access-control-allow-origin": url.origin,
+      "access-control-allow-credentials": "true",
+    };
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ ok: false, blocked: true, countryCode: country }),
+        { status: 403, headers },
+      );
+    }
+    return new Response(JSON.stringify({ ok: true }), { headers });
   }
   const target = `${backendBase()}/${splat}${url.search}`;
 
