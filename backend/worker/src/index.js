@@ -94,7 +94,16 @@ function corsHeaders(request, env) {
 
 export default {
   async fetch(request, env) {
-    const origin = new URL(env.ORIGIN_URL);
+    const config = validateEnv(env);
+    if (config.errors.length) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "worker_misconfigured", details: config.errors }),
+        { status: 500, headers: { "Content-Type": "application/json", ...NO_CACHE } },
+      );
+    }
+
+    const origin = config.originUrl;
+
     const incoming = new URL(request.url);
     const target = new URL(incoming.pathname + incoming.search, origin);
     const headers = new Headers(request.headers);
