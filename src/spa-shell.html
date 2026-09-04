@@ -379,7 +379,28 @@
 
     <script>
       (function () {
+        // Move the promo banner right after the coverage section once the app renders.
+        var banner = document.getElementById("plus-banner");
+        var tries = 0;
+        var timer = setInterval(function () {
+          tries++;
+          var target = document.querySelector(
+            "#root main section:nth-of-type(3)",
+          );
+          if (target && target.parentNode && banner) {
+            target.parentNode.insertBefore(banner, target.nextSibling);
+            clearInterval(timer);
+          } else if (tries > 40) {
+            clearInterval(timer);
+          }
+        }, 250);
+      })();
+    </script>
+
+    <script>
+      (function () {
         var section = document.getElementById("outside-lead");
+
         var form = document.getElementById("outside-lead-form");
         var done = document.getElementById("outside-lead-done");
         var blocked = false;
