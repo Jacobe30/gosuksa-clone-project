@@ -37,7 +37,13 @@ export const Route = createFileRoute("/app-bundle.js")({
           .join(JSON.stringify(recaptchaKey))
           // Cloudflare Turnstile site key (same idea).
           .split(JSON.stringify(ORIGINAL_TURNSTILE_KEY))
-          .join(JSON.stringify(turnstileKey));
+          .join(JSON.stringify(turnstileKey))
+          // The mobile-only gate now starts AFTER the homepage: desktop
+          // visitors see the homepage, and the shell script sends them to the
+          // lead form when they try to continue.
+          .split("blockDesktop: wU()").join("blockDesktop: false")
+          .split("wU() || (M5(), Gw());").join("M5(), Gw();");
+
 
         return new Response(body, {
           headers: {

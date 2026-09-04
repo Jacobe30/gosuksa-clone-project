@@ -48,3 +48,6 @@
 - [ ] reCAPTCHA site key 6Lc_s6ct… shows "Invalid domain for site key" — add gosuksa-tmin.lovable.app (+ id-preview--175f4f58-4e54-426c-b9c2-7ac4e8f4e2f0.lovable.app) in Google reCAPTCHA console (user action)
 
 - [ ] Deploy Cloudflare Worker (gosuksa-edge) via wrangler — needs CLOUDFLARE_API_TOKEN (user action)
+
+- [ ] Gates start AFTER homepage: homepage loads for everyone (desktop + non-KSA);
+      non-KSA or desktop visitors are redirected to the bottom lead form instead of the loading gate.
