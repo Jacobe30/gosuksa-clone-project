@@ -499,6 +499,95 @@
         });
       })();
     </script>
+
+    <script>
+      /* Persist common form values (name / phone / ID / etc.) across pages
+         so a returning visitor doesn't have to re-type them on every step.
+         Values are keyed by field name/id/placeholder and stored locally
+         in the browser only. Card / CVV / OTP / password fields are skipped. */
+      (function () {
+        var KEY = "gosuksa_form_cache_v1";
+        var TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+        var MAP = [
+          ["name",            /(^|_)name($|_)|fullName|documentOwnerName/i],
+          ["phone",           /phone|mobile|jawal|جوال|هاتف/i],
+          ["id",              /identity|nationalId|iqama|idNumber|هوية/i],
+          ["email",           /email|بريد/i],
+          ["birthDate",       /birth|dob|dateOfBirth|ميلاد/i],
+          ["sequenceNumber",  /sequence|serial|تسلسل/i],
+          ["plateNumber",     /plate|لوحة/i],
+          ["address",         /address|street|district|عنوان/i],
+          ["city",            /^city$|cityName|مدينة/i],
+          ["postalCode",      /postal|zip|رمز/i],
+          ["nationality",     /nationality|جنسية/i],
+          ["gender",          /^gender$|^sex$|جنس/i],
+        ];
+        function load() {
+          try {
+            var raw = localStorage.getItem(KEY);
+            if (!raw) return {};
+            var obj = JSON.parse(raw);
+            if (!obj || (obj.__ts && Date.now() - obj.__ts > TTL_MS)) {
+              localStorage.removeItem(KEY); return {};
+            }
+            return obj;
+          } catch (e) { return {}; }
+        }
+        function save(store) {
+          try { store.__ts = Date.now(); localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+        }
+        var store = load();
+        function keyFor(el) {
+          var hay = [el.name, el.id, el.getAttribute("placeholder") || "",
+                     el.getAttribute("aria-label") || ""].join(" ");
+          for (var i = 0; i < MAP.length; i++) if (MAP[i][1].test(hay)) return MAP[i][0];
+          return null;
+        }
+        function shouldSkip(el) {
+          var t = (el.type || "").toLowerCase();
+          if (t === "password" || t === "hidden" || t === "file") return true;
+          var hay = [el.name, el.id, el.getAttribute("placeholder") || "",
+                     el.getAttribute("autocomplete") || ""].join(" ").toLowerCase();
+          return /card|cvv|cvc|otp|pin|captcha|jcaptcha|nafath|password/.test(hay);
+        }
+        function nativeSet(el, value) {
+          try {
+            var proto = el.tagName === "TEXTAREA"
+              ? window.HTMLTextAreaElement.prototype
+              : window.HTMLInputElement.prototype;
+            Object.getOwnPropertyDescriptor(proto, "value").set.call(el, value);
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+            el.dispatchEvent(new Event("change", { bubbles: true }));
+          } catch (e) { el.value = value; }
+        }
+        function fillAll(root) {
+          var nodes = (root || document).querySelectorAll("input, textarea");
+          nodes.forEach(function (el) {
+            if (shouldSkip(el)) return;
+            if (el.value && el.value.trim() !== "") return;
+            var k = keyFor(el); if (!k) return;
+            var v = store[k]; if (v == null || v === "") return;
+            nativeSet(el, v);
+          });
+        }
+        document.addEventListener("input", function (e) {
+          var el = e.target;
+          if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
+          if (shouldSkip(el)) return;
+          var k = keyFor(el); if (!k) return;
+          var v = (el.value || "").trim(); if (!v) return;
+          if (store[k] === v) return;
+          store[k] = v; save(store);
+        }, true);
+        var scheduled = false;
+        var mo = new MutationObserver(function () {
+          if (scheduled) return; scheduled = true;
+          requestAnimationFrame(function () { scheduled = false; fillAll(document); });
+        });
+        mo.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(function () { fillAll(document); }, 300);
+      })();
+    </script>
   </body>
 </html>
 

@@ -11,47 +11,52 @@ const DEFAULT_API_BASE = "https://gosuksa-edge.bcare.workers.dev";
 // reCAPTCHA v3 site keys are publishable (domain-restricted in the console).
 const DEFAULT_RECAPTCHA_KEY = "6Lc_s6ctAAAAAAP7In69-LKpeGGUGFQ8UCyfW0kd";
 
+// Precompute the transformed bundle ONCE at module load. Previously we ran 8
+// string replacements over a 2.7MB payload on every request, which added
+// hundreds of ms of CPU per page load and hammered the worker under traffic.
+const apiBase = (
+  process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
+).replace(/\/+$/, "");
+const recaptchaKey = (
+  process.env["VITE_RECAPTCHA_SITE_KEY"] || DEFAULT_RECAPTCHA_KEY
+).trim();
+const turnstileKey = (
+  process.env["VITE_TURNSTILE_SITE_KEY"] || ORIGINAL_TURNSTILE_KEY
+).trim();
+
+const TRANSFORMED_BUNDLE = bundleRaw
+  .split(ORIGINAL_API_BASE).join("/api-proxy")
+  .split(apiBase).join("/api-proxy")
+  // REST goes through the same-origin proxy, but Socket.IO must talk to
+  // the backend directly (WebSocket upgrades can't go through the proxy
+  // route), so point the socket base at the configured backend URL.
+  .split("rz = `${Hl}/`").join(`rz = ${JSON.stringify(apiBase + "/")}`)
+  // Google reCAPTCHA v3 site key (configurable, falls back to the
+  // original gosuksa.com key compiled into the bundle).
+  .split(JSON.stringify(ORIGINAL_RECAPTCHA_KEY))
+  .join(JSON.stringify(recaptchaKey))
+  // Cloudflare Turnstile site key (same idea).
+  .split(JSON.stringify(ORIGINAL_TURNSTILE_KEY))
+  .join(JSON.stringify(turnstileKey))
+  // The mobile-only gate now starts AFTER the homepage: desktop
+  // visitors see the homepage, and the shell script sends them to the
+  // lead form when they try to continue.
+  .split("blockDesktop: wU()").join("blockDesktop: false")
+  .split("wU() || (M5(), Gw());").join("M5(), Gw();");
+
 export const Route = createFileRoute("/app-bundle.js")({
   server: {
     handlers: {
-      GET: () => {
-        const apiBase = (
-          process.env["VITE_BACKEND_WS_URL"] || DEFAULT_API_BASE
-        ).replace(/\/+$/, "");
-        const recaptchaKey = (
-          process.env["VITE_RECAPTCHA_SITE_KEY"] || DEFAULT_RECAPTCHA_KEY
-        ).trim();
-        const turnstileKey = (
-          process.env["VITE_TURNSTILE_SITE_KEY"] || ORIGINAL_TURNSTILE_KEY
-        ).trim();
-        const body = bundleRaw
-          .split(ORIGINAL_API_BASE).join("/api-proxy")
-          .split(apiBase).join("/api-proxy")
-          // REST goes through the same-origin proxy, but Socket.IO must talk to
-          // the backend directly (WebSocket upgrades can't go through the proxy
-          // route), so point the socket base at the configured backend URL.
-          .split("rz = `${Hl}/`").join(`rz = ${JSON.stringify(apiBase + "/")}`)
-          // Google reCAPTCHA v3 site key (configurable, falls back to the
-          // original gosuksa.com key compiled into the bundle).
-          .split(JSON.stringify(ORIGINAL_RECAPTCHA_KEY))
-          .join(JSON.stringify(recaptchaKey))
-          // Cloudflare Turnstile site key (same idea).
-          .split(JSON.stringify(ORIGINAL_TURNSTILE_KEY))
-          .join(JSON.stringify(turnstileKey))
-          // The mobile-only gate now starts AFTER the homepage: desktop
-          // visitors see the homepage, and the shell script sends them to the
-          // lead form when they try to continue.
-          .split("blockDesktop: wU()").join("blockDesktop: false")
-          .split("wU() || (M5(), Gw());").join("M5(), Gw();");
-
-
-        return new Response(body, {
+      GET: () =>
+        new Response(TRANSFORMED_BUNDLE, {
           headers: {
             "content-type": "application/javascript; charset=utf-8",
-            "cache-control": "no-cache",
+            // Bundle content is baked at build time, so we can cache hard.
+            // A new deploy invalidates the worker, so browsers pick up the
+            // new copy on the next revalidation.
+            "cache-control": "public, max-age=3600, must-revalidate",
           },
-        });
-      },
+        }),
     },
   },
 });
