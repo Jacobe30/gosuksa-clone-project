@@ -17,28 +17,30 @@ async function proxy({ request, params }: any) {
   // enforced the KSA-only geo restriction. Restore that behavior here: allow
   // Saudi Arabia visitors through, otherwise fail the gate so the frontend
   // stays on its loading/blocked screen (same UX as the original site).
-  if (splat.replace(/^\/+/, "") === "breinit") {
-    const country = (
-      request.headers.get("cf-ipcountry") ||
-      request.headers.get("x-vercel-ip-country") ||
-      request.headers.get("x-country-code") ||
-      ""
-    ).toUpperCase();
-    const allowed = !country || country === "SA";
+  const cleanPath = splat.replace(/^\/+/, "");
+  const country = (
+    request.headers.get("cf-ipcountry") ||
+    request.headers.get("x-vercel-ip-country") ||
+    request.headers.get("x-country-code") ||
+    ""
+  ).toUpperCase();
+  const allowed = !country || country === "SA";
+
+  if (cleanPath === "breinit" || cleanPath === "geo") {
     const headers = {
       "content-type": "application/json",
       "cache-control": "no-store",
       "access-control-allow-origin": url.origin,
       "access-control-allow-credentials": "true",
     };
-    if (!allowed) {
-      return new Response(
-        JSON.stringify({ ok: false, blocked: true, countryCode: country }),
-        { status: 403, headers },
-      );
-    }
-    return new Response(JSON.stringify({ ok: true }), { headers });
+    // The homepage now opens for everyone. Visitors outside KSA are handled by
+    // the lead form at the bottom of the page instead of a hard block.
+    return new Response(
+      JSON.stringify({ ok: true, allowed, countryCode: country || "XX" }),
+      { headers },
+    );
   }
+
   const target = `${backendBase()}/${splat}${url.search}`;
 
   const headers = new Headers(request.headers);
