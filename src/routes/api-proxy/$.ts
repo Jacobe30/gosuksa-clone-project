@@ -90,9 +90,9 @@ async function proxy({ request, params }: any) {
   // The backend's /api/user/init reply omits the `userInfo` block the frontend
   // requires (it throws "Server did not return UUID" and spins forever).
   // Fill it in from the client-sent uuid when the backend leaves it out.
-  if (/^\/?api\/user\/init\/?$/.test(splat) && res.ok) {
+  if (/^\/?api\/user\/init\/?$/.test(splat)) {
     try {
-      const data: any = await res.clone().json();
+      const data: any = res.ok ? await res.clone().json() : {};
       if (!data?.userInfo?.uuid) {
         let sentUuid = "";
         try {
