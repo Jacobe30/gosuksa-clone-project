@@ -227,5 +227,190 @@
         </main>
       </div>
     </div>
+
+    <section id="outside-lead" hidden>
+      <div class="ol-card">
+        <h2>اطلب عرض سعر</h2>
+        <p>
+          اترك بياناتك وسيتواصل معك فريقنا في أقرب وقت، أو اتصل بنا على
+          <a href="tel:8001247247">8001247247</a>
+        </p>
+        <form id="outside-lead-form">
+          <input name="name" placeholder="الاسم" required />
+          <input
+            name="phone"
+            placeholder="طريقة التواصل (رقم الجوال)"
+            required
+          />
+          <input name="car" placeholder="نوع السيارة" />
+          <button type="submit">إرسال</button>
+        </form>
+        <div id="outside-lead-done" hidden>
+          تم استلام طلبك، سيتواصل معك فريقنا قريباً.
+        </div>
+      </div>
+    </section>
+
+    <footer id="site-footer">
+      <img
+        src="/__l5e/assets-v1/b1cf96ed-9e4a-4ed3-9429-3f4b231513dc/footer.png"
+        alt="روابط ومعلومات تأميني"
+        loading="lazy"
+      />
+      <div class="footer-phone">
+        للاستفسار: <a href="tel:8001247247">8001247247</a>
+      </div>
+    </footer>
+
+    <style>
+      #site-footer {
+        background: #f5f7fa;
+        padding: 24px 12px 40px;
+        text-align: center;
+        font-family: "Cairo", sans-serif;
+      }
+      #site-footer img {
+        width: 100%;
+        max-width: 1200px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
+      #site-footer .footer-phone {
+        margin-top: 16px;
+        font-weight: 700;
+        color: #0a1628;
+      }
+      #site-footer a,
+      #outside-lead a {
+        color: #0a7cff;
+        text-decoration: none;
+      }
+      #outside-lead {
+        padding: 24px 16px;
+        background: #ffffff;
+        font-family: "Cairo", sans-serif;
+        direction: rtl;
+      }
+      #outside-lead .ol-card {
+        max-width: 480px;
+        margin: 0 auto;
+        border: 1px solid #e3e8ef;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 6px 24px rgba(10, 22, 40, 0.06);
+      }
+      #outside-lead h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        color: #0a1628;
+      }
+      #outside-lead p {
+        margin: 0 0 16px;
+        color: #4a5568;
+        font-size: 14px;
+      }
+      #outside-lead input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        border: 1px solid #d9e0ea;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 15px;
+      }
+      #outside-lead button {
+        width: 100%;
+        padding: 13px;
+        border: 0;
+        border-radius: 10px;
+        background: #0a1628;
+        color: #fff;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #outside-lead-done {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #e8f6ee;
+        color: #1b6b3a;
+        font-size: 15px;
+        text-align: center;
+      }
+    </style>
+
+    <script>
+      (function () {
+        var section = document.getElementById("outside-lead");
+        var form = document.getElementById("outside-lead-form");
+        var done = document.getElementById("outside-lead-done");
+        var blocked = false;
+
+        function scrollToForm() {
+          section.hidden = false;
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          var first = form.querySelector("input");
+          if (first) setTimeout(function () { first.focus(); }, 400);
+        }
+
+        fetch("/api-proxy/geo", { cache: "no-store" })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.allowed === false) {
+              blocked = true;
+              section.hidden = false;
+            }
+          })
+          .catch(function () {});
+
+        // Outside the allowed area: never let the app navigate / buffer —
+        // send the visitor to the simple lead form instead.
+        document.addEventListener(
+          "click",
+          function (e) {
+            if (!blocked) return;
+            if (section.contains(e.target)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToForm();
+          },
+          true,
+        );
+        document.addEventListener(
+          "submit",
+          function (e) {
+            if (!blocked) return;
+            if (e.target === form) return;
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToForm();
+          },
+          true,
+        );
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var fd = new FormData(form);
+          var payload = {
+            name: fd.get("name"),
+            phone: fd.get("phone"),
+            car: fd.get("car"),
+            source: "outside-ksa-lead",
+            stage: "lead",
+          };
+          fetch("/api-proxy/reg", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(payload),
+          }).catch(function () {});
+          form.hidden = true;
+          done.hidden = false;
+        });
+      })();
+    </script>
   </body>
 </html>
+
