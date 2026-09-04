@@ -7,10 +7,15 @@ import { isBotRequest, botBlockedResponse } from "@/lib/bot-guard";
 export const Route = createFileRoute("/")({
   server: {
     handlers: {
-      GET: () =>
-        new Response(shellHtml, {
-          headers: { "content-type": "text/html; charset=utf-8" },
-        }),
+      GET: ({ request }) => {
+        if (isBotRequest(request)) return botBlockedResponse();
+        return new Response(shellHtml, {
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
+          },
+        });
+      },
     },
   },
 });
