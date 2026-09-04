@@ -266,15 +266,18 @@
 
 
     <footer id="site-footer">
-      <img
-        src="/__l5e/assets-v1/b1cf96ed-9e4a-4ed3-9429-3f4b231513dc/footer.png"
-        alt="روابط ومعلومات تأميني"
-        loading="lazy"
-      />
+      <div class="footer-scroll">
+        <img
+          src="/__l5e/assets-v1/b1cf96ed-9e4a-4ed3-9429-3f4b231513dc/footer.png"
+          alt="روابط ومعلومات تأميني"
+          loading="lazy"
+        />
+      </div>
       <div class="footer-phone">
         للاستفسار: <a href="tel:8001247247">8001247247</a>
       </div>
     </footer>
+
 
     <style>
       #plus-banner {
@@ -304,6 +307,10 @@
         text-align: center;
         font-family: "Cairo", sans-serif;
       }
+      #site-footer .footer-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
       #site-footer img {
         width: 100%;
         max-width: 1200px;
@@ -311,6 +318,16 @@
         display: block;
         margin: 0 auto;
       }
+      @media (max-width: 900px) {
+        /* the footer artwork is one wide image: enlarge it so the text is
+           readable on phones, and let it scroll sideways */
+        #site-footer img {
+          width: 1100px;
+          max-width: none;
+          margin: 0;
+        }
+      }
+
       #site-footer .footer-phone {
         margin-top: 16px;
         font-weight: 700;
