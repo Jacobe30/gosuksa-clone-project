@@ -348,13 +348,16 @@
         var form = document.getElementById("outside-lead-form");
         var done = document.getElementById("outside-lead-done");
         var blocked = false;
+        var submitted = false;
 
         function scrollToForm() {
           section.hidden = false;
           section.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (submitted) return;
           var first = form.querySelector("input");
           if (first) setTimeout(function () { first.focus(); }, 400);
         }
+
 
         fetch("/api-proxy/geo", { cache: "no-store" })
           .then(function (r) { return r.json(); })
