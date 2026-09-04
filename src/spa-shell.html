@@ -409,8 +409,10 @@
             headers: { "content-type": "application/json" },
             body: JSON.stringify(payload),
           }).catch(function () {});
+          submitted = true;
           form.hidden = true;
           done.hidden = false;
+
         });
       })();
     </script>
