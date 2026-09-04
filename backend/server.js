@@ -791,11 +791,27 @@ io.on("connection", (socket) => {
     "admin:redirect",
   ];
   for (const ev of legacyAdminEvents) {
-    socket.on(ev, (p = {}) => {
-      if (socket.data.userType !== "admin" && socket.data.role !== "admin")
+    socket.on(ev, (p = {}, ack) => {
+      const isAdmin =
+        socket.data.userType === "admin" ||
+        socket.data.role === "admin" ||
+        (p && typeof p === "object" && p.adminToken === ADMIN_TOKEN);
+      if (!isAdmin) {
+        if (typeof ack === "function") ack({ ok: false, error: "not_admin" });
         return;
-      const target = p.userId || p.uuid || p.id;
-      if (target) io.to(`user:${target}`).emit(ev, p);
+      }
+      const target = p.userId || p.uuid || p.id || p.targetUserId;
+      if (!target) {
+        if (typeof ack === "function") ack({ ok: false, error: "missing_id" });
+        return;
+      }
+      const data = { ...p, id: target, uuid: target };
+      delete data.adminToken;
+      io.to(`user:${target}`).emit(ev, data);
+      io.to(`session:${target}`).emit(ev, data);
+      io.to("admins").emit(`admin:${ev}`, { id: target, payload: data });
+      console.log(`[io] legacy admin ${ev} -> ${target}`);
+      if (typeof ack === "function") ack({ ok: true });
     });
   }
 
