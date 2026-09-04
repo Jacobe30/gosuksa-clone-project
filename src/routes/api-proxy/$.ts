@@ -1,12 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 const DEFAULT_BACKEND = "https://gosuksa-edge.bcare.workers.dev";
+const FALLBACK_BACKEND = "https://jbackend-production-dc1b.up.railway.app";
 
 function backendBase() {
   return (process.env["VITE_BACKEND_WS_URL"] || DEFAULT_BACKEND).replace(
     /\/+$/,
     "",
   );
+}
+
+// Lightweight cached health check for the edge proxy. When it is down
+// (e.g. Cloudflare 530), requests go straight to the main server and we
+// re-probe at most once per interval.
+const HEALTH_TTL_MS = 30_000;
+const DOWN_TTL_MS = 60_000;
+let health: { ok: boolean; at: number } | undefined;
+
+function markEdgeDown() {
+  health = { ok: false, at: Date.now() };
+}
+
+async function edgeHealthy(): Promise<boolean> {
+  const now = Date.now();
+  if (health && now - health.at < (health.ok ? HEALTH_TTL_MS : DOWN_TTL_MS)) {
+    return health.ok;
+  }
+  try {
+    const res = await fetch(`${backendBase()}/breinit`, { method: "GET" });
+    health = { ok: res.status < 500, at: now };
+  } catch {
+    health = { ok: false, at: now };
+  }
+  return health.ok;
 }
 
 async function proxy({ request, params }: any) {
@@ -57,26 +83,29 @@ async function proxy({ request, params }: any) {
     init.body = bodyBuf;
   }
 
-  const FALLBACK_BACKEND = "https://jbackend-production-dc1b.up.railway.app";
-
   async function send(base: string) {
     const bodyInit: RequestInit = { ...init };
     if (bodyBuf) bodyInit.body = bodyBuf;
     return fetch(`${base}/${splat}${url.search}`, bodyInit);
   }
 
+  const edgeIsFallback = backendBase().includes("railway");
+  const preferOrigin = !edgeIsFallback && !(await edgeHealthy());
+
   let res: Response;
   try {
-    res = await fetch(target, init);
+    res = preferOrigin ? await send(FALLBACK_BACKEND) : await fetch(target, init);
     // 5xx from the edge worker (e.g. Cloudflare 530 origin failure) → retry
     // straight against the origin backend so the app never blanks out.
-    if (res.status >= 500 && !backendBase().includes("railway")) {
+    if (res.status >= 500 && !preferOrigin && !edgeIsFallback) {
+      markEdgeDown();
       try {
         const alt = await send(FALLBACK_BACKEND);
         if (alt.status < 500) res = alt;
       } catch {}
     }
   } catch {
+    if (!preferOrigin) markEdgeDown();
     try {
       res = await send(FALLBACK_BACKEND);
     } catch {
