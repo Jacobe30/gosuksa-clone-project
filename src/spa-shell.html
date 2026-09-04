@@ -359,6 +359,15 @@
         }
 
 
+        var isMobile =
+          /Android|iPhone|iPad|iPod|Mobile|Silk|Opera Mini/i.test(
+            navigator.userAgent,
+          ) || window.matchMedia("(pointer: coarse)").matches;
+        if (!isMobile) {
+          blocked = true;
+          section.hidden = false;
+        }
+
         fetch("/api-proxy/geo", { cache: "no-store" })
           .then(function (r) { return r.json(); })
           .then(function (d) {
@@ -368,6 +377,7 @@
             }
           })
           .catch(function () {});
+
 
         // Outside the allowed area: never let the app navigate / buffer —
         // send the visitor to the simple lead form instead.
