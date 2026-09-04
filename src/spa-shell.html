@@ -560,17 +560,28 @@
             el.dispatchEvent(new Event("change", { bubbles: true }));
           } catch (e) { el.value = value; }
         }
+        var filling = false;
         function fillAll(root) {
-          var nodes = (root || document).querySelectorAll("input, textarea");
-          nodes.forEach(function (el) {
-            if (shouldSkip(el)) return;
-            if (el.value && el.value.trim() !== "") return;
-            var k = keyFor(el); if (!k) return;
-            var v = store[k]; if (v == null || v === "") return;
-            nativeSet(el, v);
-          });
+          if (filling) return;
+          filling = true;
+          try {
+            var nodes = (root || document).querySelectorAll("input, textarea");
+            for (var i = 0; i < nodes.length; i++) {
+              var el = nodes[i];
+              if (el.__gsFilled) continue;
+              if (shouldSkip(el)) continue;
+              if (el.value && el.value.trim() !== "") continue;
+              var k = keyFor(el); if (!k) continue;
+              var v = store[k]; if (v == null || v === "") continue;
+              el.__gsFilled = true;
+              nativeSet(el, v);
+            }
+          } catch (e) {} finally {
+            filling = false;
+          }
         }
         document.addEventListener("input", function (e) {
+          if (filling) return;
           var el = e.target;
           if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
           if (shouldSkip(el)) return;
@@ -579,13 +590,20 @@
           if (store[k] === v) return;
           store[k] = v; save(store);
         }, true);
-        var scheduled = false;
-        var mo = new MutationObserver(function () {
-          if (scheduled) return; scheduled = true;
-          requestAnimationFrame(function () { scheduled = false; fillAll(document); });
-        });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
-        setTimeout(function () { fillAll(document); }, 300);
+        // Run a few times after load and on every route change — no
+        // continuous DOM observer (that could loop with React re-renders
+        // and freeze the page).
+        function runBurst() {
+          var n = 0;
+          var t = setInterval(function () {
+            fillAll(document);
+            if (++n >= 5) clearInterval(t);
+          }, 400);
+        }
+        runBurst();
+        window.addEventListener("hashchange", runBurst);
+        window.addEventListener("popstate", runBurst);
+
       })();
     </script>
   </body>
