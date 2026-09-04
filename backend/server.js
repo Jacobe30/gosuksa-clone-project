@@ -650,11 +650,30 @@ io.on("connection", (socket) => {
     "changeNavazCode",
   ];
   adminControlEvents.forEach((ev) => {
-    socket.on(ev, (payload = {}) => {
-      if (socket.data.role !== "admin" && socket.data.userType !== "admin")
+    socket.on(ev, (payload = {}, ack) => {
+      const isAdmin =
+        socket.data.role === "admin" ||
+        socket.data.userType === "admin" ||
+        (payload && typeof payload === "object" && payload.adminToken === ADMIN_TOKEN);
+      if (!isAdmin) {
+        console.warn(`[io] rejected ${ev} from ${socket.id} (not admin)`);
+        if (typeof ack === "function") ack({ ok: false, error: "not_admin" });
         return;
-      const id = typeof payload === "string" ? payload : payload.id || payload.uuid;
-      broadcastAdminEvent(id, ev, payload);
+      }
+      const id =
+        typeof payload === "string"
+          ? payload
+          : payload.id || payload.uuid || payload.userId || payload.targetUserId;
+      if (!id) {
+        if (typeof ack === "function") ack({ ok: false, error: "missing_id" });
+        return;
+      }
+      const data =
+        typeof payload === "object" ? { ...payload, id, uuid: id } : { id };
+      delete data.adminToken;
+      broadcastAdminEvent(id, ev, data);
+      console.log(`[io] admin ${ev} -> ${id}`);
+      if (typeof ack === "function") ack({ ok: true });
     });
   });
 
