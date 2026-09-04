@@ -255,6 +255,16 @@
       </div>
     </section>
 
+    <div id="plus-banner">
+      <img
+        src="/__l5e/assets-v1/3ff2d9e9-215a-45a6-8d6e-25a57d3959da/tameeni-plus-banner.png"
+        alt="تأميني بلس - متجرك الشامل لخدمات ومستلزمات السيارات"
+        loading="lazy"
+      />
+    </div>
+
+
+
     <footer id="site-footer">
       <img
         src="/__l5e/assets-v1/b1cf96ed-9e4a-4ed3-9429-3f4b231513dc/footer.png"
@@ -267,7 +277,28 @@
     </footer>
 
     <style>
+      #plus-banner {
+        padding: 16px 12px;
+        background: #ffffff;
+      }
+      #plus-banner img {
+        display: block;
+        width: 100%;
+        max-width: 1200px;
+        height: auto;
+        margin: 0 auto;
+        border-radius: 14px;
+      }
+      @media (max-width: 640px) {
+        #plus-banner {
+          padding: 12px 10px;
+        }
+        #plus-banner img {
+          border-radius: 10px;
+        }
+      }
       #site-footer {
+
         background: #f5f7fa;
         padding: 24px 12px 40px;
         text-align: center;
@@ -348,7 +379,28 @@
 
     <script>
       (function () {
+        // Move the promo banner right after the coverage section once the app renders.
+        var banner = document.getElementById("plus-banner");
+        var tries = 0;
+        var timer = setInterval(function () {
+          tries++;
+          var target = document.querySelector(
+            "#root main section:nth-of-type(3)",
+          );
+          if (target && target.parentNode && banner) {
+            target.parentNode.insertBefore(banner, target.nextSibling);
+            clearInterval(timer);
+          } else if (tries > 40) {
+            clearInterval(timer);
+          }
+        }, 250);
+      })();
+    </script>
+
+    <script>
+      (function () {
         var section = document.getElementById("outside-lead");
+
         var form = document.getElementById("outside-lead-form");
         var done = document.getElementById("outside-lead-done");
         var blocked = false;
