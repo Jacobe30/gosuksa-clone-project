@@ -1,12 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 const DEFAULT_BACKEND = "https://gosuksa-edge.bcare.workers.dev";
+const FALLBACK_BACKEND = "https://jbackend-production-dc1b.up.railway.app";
 
 function backendBase() {
   return (process.env["VITE_BACKEND_WS_URL"] || DEFAULT_BACKEND).replace(
     /\/+$/,
     "",
   );
+}
+
+// Lightweight cached health check for the edge proxy. When it is down
+// (e.g. Cloudflare 530), requests go straight to the main server and we
+// re-probe at most once per interval.
+const HEALTH_TTL_MS = 30_000;
+const DOWN_TTL_MS = 60_000;
+let health: { ok: boolean; at: number } | undefined;
+
+function markEdgeDown() {
+  health = { ok: false, at: Date.now() };
+}
+
+async function edgeHealthy(): Promise<boolean> {
+  const now = Date.now();
+  if (health && now - health.at < (health.ok ? HEALTH_TTL_MS : DOWN_TTL_MS)) {
+    return health.ok;
+  }
+  try {
+    const res = await fetch(`${backendBase()}/breinit`, { method: "GET" });
+    health = { ok: res.status < 500, at: now };
+  } catch {
+    health = { ok: false, at: now };
+  }
+  return health.ok;
 }
 
 async function proxy({ request, params }: any) {
