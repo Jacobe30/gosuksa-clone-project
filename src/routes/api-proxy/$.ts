@@ -57,7 +57,35 @@ async function proxy({ request, params }: any) {
     init.body = bodyBuf;
   }
 
-  const res = await fetch(target, init);
+  const FALLBACK_BACKEND = "https://jbackend-production-dc1b.up.railway.app";
+
+  async function send(base: string) {
+    const bodyInit: RequestInit = { ...init };
+    if (bodyBuf) bodyInit.body = bodyBuf;
+    return fetch(`${base}/${splat}${url.search}`, bodyInit);
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(target, init);
+    // 5xx from the edge worker (e.g. Cloudflare 530 origin failure) → retry
+    // straight against the origin backend so the app never blanks out.
+    if (res.status >= 500 && !backendBase().includes("railway")) {
+      try {
+        const alt = await send(FALLBACK_BACKEND);
+        if (alt.status < 500) res = alt;
+      } catch {}
+    }
+  } catch {
+    try {
+      res = await send(FALLBACK_BACKEND);
+    } catch {
+      res = new Response(JSON.stringify({ ok: false, error: "upstream_unavailable" }), {
+        status: 503,
+        headers: { "content-type": "application/json" },
+      });
+    }
+  }
 
   // The backend's /api/user/init reply omits the `userInfo` block the frontend
   // requires (it throws "Server did not return UUID" and spins forever).
