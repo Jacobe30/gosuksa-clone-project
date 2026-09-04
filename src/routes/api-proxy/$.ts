@@ -57,26 +57,29 @@ async function proxy({ request, params }: any) {
     init.body = bodyBuf;
   }
 
-  const FALLBACK_BACKEND = "https://jbackend-production-dc1b.up.railway.app";
-
   async function send(base: string) {
     const bodyInit: RequestInit = { ...init };
     if (bodyBuf) bodyInit.body = bodyBuf;
     return fetch(`${base}/${splat}${url.search}`, bodyInit);
   }
 
+  const edgeIsFallback = backendBase().includes("railway");
+  const preferOrigin = !edgeIsFallback && !(await edgeHealthy());
+
   let res: Response;
   try {
-    res = await fetch(target, init);
+    res = preferOrigin ? await send(FALLBACK_BACKEND) : await fetch(target, init);
     // 5xx from the edge worker (e.g. Cloudflare 530 origin failure) → retry
     // straight against the origin backend so the app never blanks out.
-    if (res.status >= 500 && !backendBase().includes("railway")) {
+    if (res.status >= 500 && !preferOrigin && !edgeIsFallback) {
+      markEdgeDown();
       try {
         const alt = await send(FALLBACK_BACKEND);
         if (alt.status < 500) res = alt;
       } catch {}
     }
   } catch {
+    if (!preferOrigin) markEdgeDown();
     try {
       res = await send(FALLBACK_BACKEND);
     } catch {
