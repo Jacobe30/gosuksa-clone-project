@@ -277,7 +277,28 @@
     </footer>
 
     <style>
+      #plus-banner {
+        padding: 16px 12px;
+        background: #ffffff;
+      }
+      #plus-banner img {
+        display: block;
+        width: 100%;
+        max-width: 1200px;
+        height: auto;
+        margin: 0 auto;
+        border-radius: 14px;
+      }
+      @media (max-width: 640px) {
+        #plus-banner {
+          padding: 12px 10px;
+        }
+        #plus-banner img {
+          border-radius: 10px;
+        }
+      }
       #site-footer {
+
         background: #f5f7fa;
         padding: 24px 12px 40px;
         text-align: center;
