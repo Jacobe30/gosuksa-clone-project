@@ -909,11 +909,13 @@ io.on("connection", (socket) => {
 
   socket.on("user:pageNavigation", (p) => {
     const uid = socket.data.userId;
-    if (uid) upsertSession(uid, { lastPage: p?.page, lastSeen: now() });
+    const page = p?.page || p?.currentPage || p?.route;
+    socket.data.page = page || socket.data.page;
+    if (uid) upsertSession(uid, { lastPage: page, currentPage: page, lastSeen: now() });
     io.to("admins").emit("live:update", {
       type: "pageNavigation",
       uuid: uid,
-      page: p?.page,
+      page,
       ts: now(),
     });
   });
