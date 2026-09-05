@@ -2,16 +2,12 @@
 // + noindex meta). Aimed especially at Google Ads / AdsBot traffic that can burn
 // campaign budget when triggered maliciously.
 const BOT_PATTERNS = [
-  // Google (AdsBot + Mediapartners intentionally excluded so Google Ads can crawl)
-  "googlebot",
+  // Google crawlers intentionally excluded (Googlebot, Googlebot-Image/News/Video,
+  // AdsBot, Mediapartners) so Google Search + Google Ads can crawl.
   "apis-google",
   "storebot-google",
   "google-extended",
-  "google-inspectiontool",
-  "feedfetcher-google",
-  "google favicon",
-  "googleweblight",
-  "googleother",
+
 
   // Other major search engines
   "bingbot",
