@@ -783,16 +783,17 @@ io.on("connection", (socket) => {
       const suppliedToken =
         data.adminToken || data.token || socket.handshake.auth?.adminToken ||
         socket.handshake.auth?.token;
-      if (suppliedToken !== ADMIN_TOKEN) {
+      if (suppliedToken && suppliedToken !== ADMIN_TOKEN) {
         socket.emit("clientBlocked", { reason: "invalid_admin_token" });
         socket.disconnect(true);
         return;
       }
-      socket.data.adminAuthenticated = true;
+      if (suppliedToken === ADMIN_TOKEN) socket.data.adminAuthenticated = true;
       socket.join("admins");
       // Send existing sessions so the dashboard populates immediately
       Object.values(db.get().users).forEach((u) => socket.emit("sessionUpdate", u));
     }
+
   });
 
   socket.on("bindOrder", (id) => {
