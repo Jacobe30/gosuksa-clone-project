@@ -5,3 +5,7 @@
 captcha: reflect & recaptcha check
 - [x] Relay dashboard accept/reject/redirect/block events to customer-facing socket event names
 task: verify client join
+
+- Remove KSA geo gate (Google Ads: uncrawlable)
+- Remove mobile-only view restriction (show site on desktop too)
+- Remove all crawler blockers (noindex metas, robots, bot-guard)
