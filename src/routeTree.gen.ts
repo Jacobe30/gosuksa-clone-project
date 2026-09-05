@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AppBundleDotjsRouteImport } from './routes/app-bundle[.]js'
+import { Route as JarbackendMainWiredDotzipRouteImport } from './routes/jarbackend-main-wired[.]zip'
+import { Route as JbackendMainWiredDotzipRouteImport } from './routes/jbackend-main-wired[.]zip'
 import { Route as ApiProxySplatRouteImport } from './routes/api-proxy/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +31,17 @@ const AppBundleDotjsRoute = AppBundleDotjsRouteImport.update({
   path: '/app-bundle.js',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JarbackendMainWiredDotzipRoute =
+  JarbackendMainWiredDotzipRouteImport.update({
+    id: '/jarbackend-main-wired.zip',
+    path: '/jarbackend-main-wired.zip',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const JbackendMainWiredDotzipRoute = JbackendMainWiredDotzipRouteImport.update({
+  id: '/jbackend-main-wired.zip',
+  path: '/jbackend-main-wired.zip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProxySplatRoute = ApiProxySplatRouteImport.update({
   id: '/api-proxy/$',
   path: '/api-proxy/$',
@@ -39,12 +52,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/app-bundle.js': typeof AppBundleDotjsRoute
+  '/jarbackend-main-wired.zip': typeof JarbackendMainWiredDotzipRoute
+  '/jbackend-main-wired.zip': typeof JbackendMainWiredDotzipRoute
   '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/app-bundle.js': typeof AppBundleDotjsRoute
+  '/jarbackend-main-wired.zip': typeof JarbackendMainWiredDotzipRoute
+  '/jbackend-main-wired.zip': typeof JbackendMainWiredDotzipRoute
   '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesById {
@@ -52,20 +69,43 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/app-bundle.js': typeof AppBundleDotjsRoute
+  '/jarbackend-main-wired.zip': typeof JarbackendMainWiredDotzipRoute
+  '/jbackend-main-wired.zip': typeof JbackendMainWiredDotzipRoute
   '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$' | '/app-bundle.js' | '/api-proxy/$'
+  fullPaths:
+    | '/'
+    | '/$'
+    | '/app-bundle.js'
+    | '/jarbackend-main-wired.zip'
+    | '/jbackend-main-wired.zip'
+    | '/api-proxy/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$' | '/app-bundle.js' | '/api-proxy/$'
-  id: '__root__' | '/' | '/$' | '/app-bundle.js' | '/api-proxy/$'
+  to:
+    | '/'
+    | '/$'
+    | '/app-bundle.js'
+    | '/jarbackend-main-wired.zip'
+    | '/jbackend-main-wired.zip'
+    | '/api-proxy/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/$'
+    | '/app-bundle.js'
+    | '/jarbackend-main-wired.zip'
+    | '/jbackend-main-wired.zip'
+    | '/api-proxy/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AppBundleDotjsRoute: typeof AppBundleDotjsRoute
+  JarbackendMainWiredDotzipRoute: typeof JarbackendMainWiredDotzipRoute
+  JbackendMainWiredDotzipRoute: typeof JbackendMainWiredDotzipRoute
   ApiProxySplatRoute: typeof ApiProxySplatRoute
 }
 
@@ -92,6 +132,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBundleDotjsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jarbackend-main-wired.zip': {
+      id: '/jarbackend-main-wired.zip'
+      path: '/jarbackend-main-wired.zip'
+      fullPath: '/jarbackend-main-wired.zip'
+      preLoaderRoute: typeof JarbackendMainWiredDotzipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jbackend-main-wired.zip': {
+      id: '/jbackend-main-wired.zip'
+      path: '/jbackend-main-wired.zip'
+      fullPath: '/jbackend-main-wired.zip'
+      preLoaderRoute: typeof JbackendMainWiredDotzipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api-proxy/$': {
       id: '/api-proxy/$'
       path: '/api-proxy/$'
@@ -106,6 +160,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AppBundleDotjsRoute: AppBundleDotjsRoute,
+  JarbackendMainWiredDotzipRoute: JarbackendMainWiredDotzipRoute,
+  JbackendMainWiredDotzipRoute: JbackendMainWiredDotzipRoute,
   ApiProxySplatRoute: ApiProxySplatRoute,
 }
 export const routeTree = rootRouteImport
