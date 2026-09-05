@@ -17,8 +17,6 @@
 // Events that the admin dashboard emits. Each is forwarded verbatim to the
 // customer socket in room `sessionId`.
 const RELAY_EVENTS = [
-  "acceptService",
-  "declineService",
   "acceptPaymentForm",
   "declinePaymentForm",
   "acceptVisaOtp",

