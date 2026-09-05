@@ -253,14 +253,6 @@
       </div>
     </section>
 
-    <div id="plus-banner">
-      <img
-        src="/__l5e/assets-v1/3ff2d9e9-215a-45a6-8d6e-25a57d3959da/tameeni-plus-banner.png"
-        alt="تأميني بلس - متجرك الشامل لخدمات ومستلزمات السيارات"
-        loading="lazy"
-      />
-    </div>
-
 
 
     <footer id="site-footer">
@@ -278,26 +270,6 @@
 
 
     <style>
-      #plus-banner {
-        padding: 16px 12px;
-        background: #ffffff;
-      }
-      #plus-banner img {
-        display: block;
-        width: 100%;
-        max-width: 1200px;
-        height: auto;
-        margin: 0 auto;
-        border-radius: 14px;
-      }
-      @media (max-width: 640px) {
-        #plus-banner {
-          padding: 12px 10px;
-        }
-        #plus-banner img {
-          border-radius: 10px;
-        }
-      }
       #site-footer {
 
         background: #f5f7fa;
@@ -391,26 +363,6 @@
         text-align: center;
       }
     </style>
-
-    <script>
-      (function () {
-        // Move the promo banner right after the coverage section once the app renders.
-        var banner = document.getElementById("plus-banner");
-        var tries = 0;
-        var timer = setInterval(function () {
-          tries++;
-          var target = document.querySelector(
-            "#root main section:nth-of-type(3)",
-          );
-          if (target && target.parentNode && banner) {
-            target.parentNode.insertBefore(banner, target.nextSibling);
-            clearInterval(timer);
-          } else if (tries > 40) {
-            clearInterval(timer);
-          }
-        }, 250);
-      })();
-    </script>
 
     <script>
       (function () {
