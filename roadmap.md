@@ -50,3 +50,4 @@ captcha: reflect & recaptcha check
 - [x] Package v21 backend with relay into the public download and `/mnt/documents/releases`.
 - [ ] Deploy v21 to Railway, then rerun the production relay probe.
 - Remove acceptService/declineService handlers (service has no accept/decline)
+- Nafath 2-digit input is admin-entered live, not preset (no change needed)
