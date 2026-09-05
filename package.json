@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "check:images": "node scripts/check-images.mjs",
+    "prebuild": "node scripts/check-images.mjs",
+    "prebuild:dev": "node scripts/check-images.mjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
