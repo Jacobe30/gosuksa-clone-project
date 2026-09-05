@@ -38,3 +38,9 @@ captcha: reflect & recaptcha check
   acceptRajlogin / declineRajlogin, acceptRajhi / declineRajhi,
   nafathNumber all ack-timeout. Check they are in the relay whitelist
   in backend/server.js.
+
+## 2026-09-05
+- Fix build-errors.log entries before finishing.
+- User asked to add missing redirect-target pages: already all present in
+  bundle (see probe results). Reply-only, no change needed unless a
+  specific redirect fails.
