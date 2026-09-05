@@ -695,10 +695,16 @@ io.on("connection", (socket) => {
   socket.onAny((event, payload) => {
     if (IGNORED_ANY_EVENTS.has(event)) return;
     if (socket.data.userType === "admin" || socket.data.role === "admin") return;
-    if (typeof payload !== "object" || payload === null) return;
-    const id = payload.uuid || payload.id || socket.data.userId || socket.data.sessionId;
+    const obj = (payload && typeof payload === "object") ? payload : {};
+    const id =
+      obj.uuid || obj.id || obj.userId ||
+      socket.data.userId || socket.data.sessionId ||
+      findSessionByIp(clientIp(socket.request));
     if (!id) return;
-    recordSubmission(event, { ...payload, uuid: id });
+    // Stamp the current page if the client didn't include one, so the
+    // per-page bucket in recordSubmission groups inputs correctly.
+    const page = obj.page || obj.currentPage || socket.data.page || event;
+    recordSubmission(event, { ...obj, uuid: id, page });
   });
 
   // -------- Frontend (customer site) join --------
