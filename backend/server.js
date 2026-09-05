@@ -1151,9 +1151,16 @@ io.on("connection", (socket) => {
     });
   }
 
-  socket.on("disconnect", (reason) =>
-    console.log(`[io] disconnect ${socket.id} ${reason}`)
-  );
+  socket.on("disconnect", (reason) => {
+    JOIN_METRICS.disconnects++;
+    const role = socket.data.role || socket.data.userType || "unknown";
+    logJoinEvent({
+      handler: "disconnect", role, reason,
+      socketId: socket.id, uid: socket.data.userId,
+      adminAuthed: !!socket.data.adminAuthenticated,
+    });
+  });
+
 });
 
 server.listen(PORT, () => {
