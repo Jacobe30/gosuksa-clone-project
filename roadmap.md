@@ -10,3 +10,7 @@ captcha: reflect & recaptcha check
 - [x] Remove mobile-only view restriction (show site on desktop too)
 - [x] Remove all crawler blockers (noindex metas, robots, bot-guard)
 - [x] Make `/jarbackend-main-wired.zip` download the corrected backend package directly
+- [x] Detailed logging on admin socket join/reject events (JSON, JOIN_METRICS counters)
+- [x] Backend health endpoints (/health public, /admin/health protected) showing relay + admin socket status
+- [x] Fix redirect button → dashboard offline (admin-relay wrong "admin" echo room, missing session:/user: rooms, token leak stripped)
+- [x] Deploy hardened bot guard with all Google IPs + UAs whitelisted
