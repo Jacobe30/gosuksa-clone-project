@@ -421,7 +421,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v15";
+const APP_VERSION = "v16";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
