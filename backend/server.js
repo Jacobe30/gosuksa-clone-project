@@ -105,6 +105,37 @@ const io = new Server(server, {
   cors: { origin: corsOrigin, credentials: true },
 });
 
+// ---------- admin-relay (forwards admin actions to per-session client rooms)
+let RELAY_ATTACHED = false;
+try {
+  const { attachAdminRelay } = require("./admin-relay");
+  attachAdminRelay(io);
+  RELAY_ATTACHED = true;
+  console.log("[relay] admin-relay attached");
+} catch (e) {
+  console.warn("[relay] admin-relay NOT attached:", e.message);
+}
+
+// ---------- structured admin/join logging + metrics ----------
+const JOIN_METRICS = {
+  admin_join_ok: 0,
+  admin_join_missing_token: 0,
+  admin_join_invalid_token: 0,
+  admin_join_rejected: 0,
+  client_join_ok: 0,
+  client_join_blocked: 0,
+  disconnects: 0,
+};
+function logJoinEvent(evt) {
+  // Never log the token value itself.
+  try {
+    console.log(JSON.stringify({ ts: new Date().toISOString(), evt: "join", ...evt }));
+  } catch {
+    console.log("[join]", evt);
+  }
+}
+
+
 // ---------- helpers ----------
 const now = () => new Date().toISOString();
 const STARTED_AT = new Date().toISOString();
