@@ -24,3 +24,17 @@ captcha: reflect & recaptcha check
   translated by the backend relay to the namespaced event names.
 - adminRedirect payload uses `path`; frontend expects `page`. Rename.
 - Live-test every dashboard button end-to-end against production.
+
+## Nafath page (2026-09-05, user request)
+- User wants /nafath page styled like the uploaded mofa.gov.sa screenshot
+  but tuned to the site (green kept). Number badge must be removed —
+  dashboard sends the number together with the redirect.
+- Blocker: the customer site is the exported gosuksa.com SPA bundle
+  served verbatim from public/assets. Restyling requires either
+  editing the bundle or rebuilding the source. Confirm with user.
+
+## Buttons that failed the live probe (v20)
+- acceptNafath / declineNafath, acceptNaflogin / declineNaflogin,
+  acceptRajlogin / declineRajlogin, acceptRajhi / declineRajhi,
+  nafathNumber all ack-timeout. Check they are in the relay whitelist
+  in backend/server.js.
