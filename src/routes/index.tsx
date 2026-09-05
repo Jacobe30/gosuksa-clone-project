@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
         return new Response(shellHtml, {
           headers: {
             "content-type": "text/html; charset=utf-8",
-            "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
+            "x-robots-tag": "index, follow",
           },
         });
       },

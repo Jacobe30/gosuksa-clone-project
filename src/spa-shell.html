@@ -681,6 +681,234 @@
         }, true);
       })();
     </script>
+
+    <!-- Google Ads compliance: LocalBusiness JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "InsuranceAgency",
+        "name": "تأميني - GoSuksa",
+        "url": "https://gosuksa.com",
+        "telephone": "+966800124724",
+        "areaServed": "SA",
+        "priceRange": "SAR",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "SA",
+          "addressRegion": "Riyadh"
+        }
+      }
+    </script>
+
+    <!-- Google Ads compliance: business identity, trust signals, policies, consent -->
+    <div id="gs-compliance">
+      <section id="gs-trust">
+        <div class="gs-trust-inner">
+          <div class="gs-trust-item"><strong>مرخّصة</strong><span>بموجب أنظمة هيئة التأمين وساما</span></div>
+          <div class="gs-trust-item"><strong>دفع آمن</strong><span>اتصال مشفّر HTTPS · Mada / Visa / Mastercard</span></div>
+          <div class="gs-trust-item"><strong>خدمة العملاء</strong><span><a href="tel:8001247247">8001247247</a> · طوال أيام الأسبوع</span></div>
+          <div class="gs-trust-item"><strong>الأسعار</strong><span>استرشادية وتخضع لموافقة شركة التأمين</span></div>
+        </div>
+      </section>
+
+      <div id="gs-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
+        <div class="gs-consent-inner">
+          <p>
+            نستخدم ملفات تعريف الارتباط لتحسين تجربتك ولأغراض القياس والإعلان. باستخدامك للموقع فإنك توافق على
+            <a href="#" data-gs-open="privacy">سياسة الخصوصية</a> و
+            <a href="#" data-gs-open="terms">الشروط والأحكام</a>.
+          </p>
+          <div class="gs-consent-actions">
+            <button type="button" id="gs-consent-decline">رفض</button>
+            <button type="button" id="gs-consent-accept">موافق</button>
+          </div>
+        </div>
+      </div>
+
+      <nav id="gs-policy-links" aria-label="Policies">
+        <a href="#" data-gs-open="about">من نحن</a>
+        <span>·</span>
+        <a href="#" data-gs-open="privacy">سياسة الخصوصية</a>
+        <span>·</span>
+        <a href="#" data-gs-open="terms">الشروط والأحكام</a>
+        <span>·</span>
+        <a href="#" data-gs-open="refund">سياسة الاسترجاع</a>
+        <span>·</span>
+        <a href="#" data-gs-open="contact">اتصل بنا</a>
+        <div class="gs-disclaimer">
+          © تأميني - GoSuksa. جميع الحقوق محفوظة. الأسعار استرشادية وتخضع لموافقة شركة التأمين. جميع البيانات تُنقل عبر اتصال مشفّر HTTPS. لا نطلب أبدًا رمز التحقق (OTP) أو كلمة المرور عبر الهاتف أو الرسائل.
+        </div>
+      </nav>
+
+      <div id="gs-modal" class="gs-hidden" role="dialog" aria-modal="true" aria-labelledby="gs-modal-title">
+        <div class="gs-modal-backdrop" data-gs-close></div>
+        <div class="gs-modal-card">
+          <button type="button" class="gs-modal-close" data-gs-close aria-label="Close">×</button>
+          <h2 id="gs-modal-title"></h2>
+          <div id="gs-modal-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      #gs-trust {
+        background: #fff; border-top: 1px solid #e5e7eb; padding: 18px 12px;
+        font-family: "Cairo", sans-serif; direction: rtl;
+      }
+      #gs-trust .gs-trust-inner {
+        max-width: 1100px; margin: 0 auto; display: grid;
+        grid-template-columns: repeat(4, 1fr); gap: 14px;
+      }
+      #gs-trust .gs-trust-item {
+        border: 1px solid #e3e8ef; border-radius: 12px; padding: 12px 14px;
+        display: flex; flex-direction: column; gap: 4px; background: #f9fbfd;
+      }
+      #gs-trust .gs-trust-item strong { color: #0a1628; font-size: 14px; }
+      #gs-trust .gs-trust-item span { color: #4a5568; font-size: 13px; }
+      #gs-trust a { color: #0a7cff; text-decoration: none; }
+      @media (max-width: 800px) {
+        #gs-trust .gs-trust-inner { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 460px) {
+        #gs-trust .gs-trust-inner { grid-template-columns: 1fr; }
+      }
+      #gs-policy-links {
+        text-align: center; padding: 16px 12px 40px; font-family: "Cairo", sans-serif;
+        color: #4a5568; font-size: 14px; background: #f5f7fa; direction: rtl;
+      }
+      #gs-policy-links a { color: #0a7cff; text-decoration: none; margin: 0 6px; cursor: pointer; }
+      #gs-policy-links a:hover { text-decoration: underline; }
+      #gs-policy-links .gs-disclaimer {
+        margin-top: 10px; font-size: 12px; color: #6b7280;
+        max-width: 820px; margin-inline: auto; line-height: 1.7;
+      }
+      #gs-consent {
+        position: fixed; inset: auto 0 0 0; z-index: 9998;
+        background: #0a1628; color: #fff; padding: 14px 16px;
+        box-shadow: 0 -6px 24px rgba(0,0,0,.2); direction: rtl;
+        font-family: "Cairo", sans-serif;
+      }
+      #gs-consent.gs-hidden { display: none; }
+      #gs-consent .gs-consent-inner {
+        max-width: 1100px; margin: 0 auto; display: flex; gap: 16px;
+        align-items: center; justify-content: space-between; flex-wrap: wrap;
+      }
+      #gs-consent p { margin: 0; font-size: 14px; line-height: 1.6; }
+      #gs-consent a { color: #7ec3ff; text-decoration: underline; }
+      #gs-consent .gs-consent-actions { display: flex; gap: 8px; }
+      #gs-consent button {
+        padding: 10px 18px; border: 0; border-radius: 8px; font-family: inherit;
+        font-size: 14px; font-weight: 700; cursor: pointer;
+      }
+      #gs-consent-accept { background: #16a34a; color: #fff; }
+      #gs-consent-decline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); }
+      #gs-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+      #gs-modal.gs-hidden { display: none; }
+      #gs-modal .gs-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+      #gs-modal .gs-modal-card {
+        position: relative; background: #fff; color: #0a1628; direction: rtl;
+        border-radius: 14px; width: min(720px, calc(100vw - 32px));
+        max-height: 85vh; overflow-y: auto; padding: 24px 22px;
+        font-family: "Cairo", sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      }
+      #gs-modal .gs-modal-close {
+        position: absolute; top: 10px; left: 12px; background: transparent;
+        border: 0; font-size: 26px; cursor: pointer; color: #4a5568;
+      }
+      #gs-modal h2 { margin: 0 0 12px; font-size: 20px; }
+      #gs-modal-body { font-size: 14px; line-height: 1.8; color: #2d3748; }
+      #gs-modal-body h3 { font-size: 16px; margin: 14px 0 6px; }
+      #gs-modal-body p, #gs-modal-body ul { margin: 0 0 10px; }
+      #gs-modal-body ul { padding-right: 20px; }
+    </style>
+
+    <script>
+      (function () {
+        var COPY = {
+          about: {
+            title: "من نحن",
+            html:
+              "<p>تأميني - GoSuksa منصة سعودية متخصصة في وساطة تأمين المركبات، تتيح للعملاء مقارنة عروض شركات التأمين المرخّصة في المملكة وشراء الوثيقة إلكترونيًا خلال دقائق.</p>" +
+              "<h3>التزامنا</h3>" +
+              "<ul><li>نعمل وفق أنظمة هيئة التأمين والبنك المركزي السعودي (ساما).</li>" +
+              "<li>لا نبيع بيانات عملائنا ولا نشاركها إلا مع شركة التأمين المختارة لإصدار الوثيقة.</li>" +
+              "<li>خدمة العملاء متاحة طوال أيام الأسبوع للرد على أي استفسار أو شكوى.</li></ul>"
+          },
+          privacy: {
+            title: "سياسة الخصوصية",
+            html:
+              "<p>نلتزم بحماية بياناتك الشخصية وفق نظام حماية البيانات الشخصية في المملكة العربية السعودية.</p>" +
+              "<h3>البيانات التي نجمعها</h3>" +
+              "<ul><li>الاسم ورقم الجوال والبريد الإلكتروني.</li>" +
+              "<li>رقم الهوية أو الإقامة ورقم تسلسل المركبة لأغراض إصدار الوثيقة.</li>" +
+              "<li>معلومات الدفع تُعالَج مباشرةً عبر بوابة الدفع المعتمدة (Mada / Visa / Mastercard) ولا نخزّن بيانات البطاقة على خوادمنا.</li></ul>" +
+              "<h3>كيف نستخدم البيانات</h3>" +
+              "<p>لإصدار عروض التأمين، إتمام الشراء، خدمة العملاء، والامتثال للأنظمة. لا نبيع بياناتك لأي طرف ثالث.</p>" +
+              "<h3>حقوقك</h3>" +
+              "<p>يحق لك طلب الوصول أو التصحيح أو حذف بياناتك عبر التواصل معنا على support@gosuksa.com.</p>"
+          },
+          terms: {
+            title: "الشروط والأحكام",
+            html:
+              "<p>باستخدامك للموقع فإنك توافق على هذه الشروط.</p>" +
+              "<ul><li>الأسعار المعروضة استرشادية وقد تتغيّر بعد تقييم شركة التأمين للمركبة والسائق.</li>" +
+              "<li>الوثيقة الرسمية تصدر باسم مالك المركبة المسجّل لدى الجهات الرسمية.</li>" +
+              "<li>نلتزم بأنظمة هيئة التأمين والبنك المركزي السعودي (ساما).</li>" +
+              "<li>يمنع استخدام الموقع لأي غرض غير مشروع أو احتيالي.</li>" +
+              "<li>لا نطلب أبدًا رمز التحقق (OTP) أو كلمة المرور عبر الهاتف أو الرسائل النصية.</li></ul>"
+          },
+          refund: {
+            title: "سياسة الاسترجاع والإلغاء",
+            html:
+              "<p>يحق للعميل طلب إلغاء وثيقة التأمين خلال المدة النظامية المحددة من هيئة التأمين، مع خصم المدة المستخدمة والرسوم الإدارية.</p>" +
+              "<ul><li>تُقدَّم طلبات الإلغاء عبر البريد أو الاتصال بخدمة العملاء.</li>" +
+              "<li>يتم رد المبلغ على نفس وسيلة الدفع خلال 7-14 يوم عمل.</li>" +
+              "<li>لا يُسترجع المبلغ في حال وقوع مطالبة على الوثيقة.</li></ul>"
+          },
+          contact: {
+            title: "اتصل بنا",
+            html:
+              "<p>خدمة العملاء متاحة طوال أيام الأسبوع.</p>" +
+              "<ul><li>الهاتف: <a href='tel:8001247247'>8001247247</a></li>" +
+              "<li>البريد الإلكتروني: <a href='mailto:support@gosuksa.com'>support@gosuksa.com</a></li>" +
+              "<li>الدولة: المملكة العربية السعودية</li></ul>" +
+              "<p>يرجى إرسال أي شكوى أو استفسار وسنقوم بالرد خلال يوم عمل واحد.</p>"
+          }
+        };
+        var modal = document.getElementById("gs-modal");
+        var title = document.getElementById("gs-modal-title");
+        var body = document.getElementById("gs-modal-body");
+        function open(key) {
+          var c = COPY[key]; if (!c) return;
+          title.textContent = c.title;
+          body.innerHTML = c.html;
+          modal.classList.remove("gs-hidden");
+        }
+        function close() { modal.classList.add("gs-hidden"); }
+        document.addEventListener("click", function (e) {
+          var t = e.target;
+          var opener = t.closest && t.closest("[data-gs-open]");
+          if (opener) { e.preventDefault(); open(opener.getAttribute("data-gs-open")); return; }
+          if (t.closest && t.closest("[data-gs-close]")) { e.preventDefault(); close(); }
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") close();
+        });
+
+        var CONSENT_KEY = "gs_consent_v1";
+        var banner = document.getElementById("gs-consent");
+        try {
+          if (localStorage.getItem(CONSENT_KEY)) banner.classList.add("gs-hidden");
+        } catch (e) {}
+        function setConsent(v) {
+          try { localStorage.setItem(CONSENT_KEY, v); } catch (e) {}
+          banner.classList.add("gs-hidden");
+        }
+        document.getElementById("gs-consent-accept").addEventListener("click", function () { setConsent("accepted"); });
+        document.getElementById("gs-consent-decline").addEventListener("click", function () { setConsent("declined"); });
+      })();
+    </script>
   </body>
 </html>
+
 
