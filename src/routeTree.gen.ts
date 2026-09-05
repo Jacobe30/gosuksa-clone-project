@@ -14,6 +14,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as AppBundleDotjsRouteImport } from './routes/app-bundle[.]js'
 import { Route as JarbackendMainWiredDotzipRouteImport } from './routes/jarbackend-main-wired[.]zip'
 import { Route as JbackendMainWiredDotzipRouteImport } from './routes/jbackend-main-wired[.]zip'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ApiProxySplatRouteImport } from './routes/api-proxy/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,6 +43,11 @@ const JbackendMainWiredDotzipRoute = JbackendMainWiredDotzipRouteImport.update({
   path: '/jbackend-main-wired.zip',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProxySplatRoute = ApiProxySplatRouteImport.update({
   id: '/api-proxy/$',
   path: '/api-proxy/$',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/app-bundle.js': typeof AppBundleDotjsRoute
   '/jarbackend-main-wired.zip': typeof JarbackendMainWiredDotzipRoute
   '/jbackend-main-wired.zip': typeof JbackendMainWiredDotzipRoute
+  '/privacy': typeof PrivacyRoute
   '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesByTo {
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/app-bundle.js': typeof AppBundleDotjsRoute
   '/jarbackend-main-wired.zip': typeof JarbackendMainWiredDotzipRoute
   '/jbackend-main-wired.zip': typeof JbackendMainWiredDotzipRoute
+  '/privacy': typeof PrivacyRoute
   '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRoutesById {
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/app-bundle.js': typeof AppBundleDotjsRoute
   '/jarbackend-main-wired.zip': typeof JarbackendMainWiredDotzipRoute
   '/jbackend-main-wired.zip': typeof JbackendMainWiredDotzipRoute
+  '/privacy': typeof PrivacyRoute
   '/api-proxy/$': typeof ApiProxySplatRoute
 }
 export interface FileRouteTypes {
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/app-bundle.js'
     | '/jarbackend-main-wired.zip'
     | '/jbackend-main-wired.zip'
+    | '/privacy'
     | '/api-proxy/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/app-bundle.js'
     | '/jarbackend-main-wired.zip'
     | '/jbackend-main-wired.zip'
+    | '/privacy'
     | '/api-proxy/$'
   id:
     | '__root__'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/app-bundle.js'
     | '/jarbackend-main-wired.zip'
     | '/jbackend-main-wired.zip'
+    | '/privacy'
     | '/api-proxy/$'
   fileRoutesById: FileRoutesById
 }
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   AppBundleDotjsRoute: typeof AppBundleDotjsRoute
   JarbackendMainWiredDotzipRoute: typeof JarbackendMainWiredDotzipRoute
   JbackendMainWiredDotzipRoute: typeof JbackendMainWiredDotzipRoute
+  PrivacyRoute: typeof PrivacyRoute
   ApiProxySplatRoute: typeof ApiProxySplatRoute
 }
 
@@ -146,6 +159,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JbackendMainWiredDotzipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api-proxy/$': {
       id: '/api-proxy/$'
       path: '/api-proxy/$'
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppBundleDotjsRoute: AppBundleDotjsRoute,
   JarbackendMainWiredDotzipRoute: JarbackendMainWiredDotzipRoute,
   JbackendMainWiredDotzipRoute: JbackendMainWiredDotzipRoute,
+  PrivacyRoute: PrivacyRoute,
   ApiProxySplatRoute: ApiProxySplatRoute,
 }
 export const routeTree = rootRouteImport
