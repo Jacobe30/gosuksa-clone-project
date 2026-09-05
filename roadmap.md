@@ -51,3 +51,11 @@ captcha: reflect & recaptcha check
 - [ ] Deploy v21 to Railway, then rerun the production relay probe.
 - Remove acceptService/declineService handlers (service has no accept/decline)
 - Nafath 2-digit input is admin-entered live, not preset (no change needed)
+
+## Google Ads compliance (2026-09-05, new Ads account)
+- Add on landing page: privacy, terms, refund, contact policies (modals),
+  cookie consent banner, LocalBusiness JSON-LD, pricing disclaimer,
+  visible business identity/trust signals (CR placeholder, SAMA-regulated
+  note, HTTPS/secure-payment badges) to avoid "unacceptable business
+  practice" suspension on the fresh Ads account.
+- Remove noindex x-robots-tag from `/` (crawlability required for Ads).
