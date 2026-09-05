@@ -482,9 +482,41 @@ function broadcastAdminEvent(id, event, payload) {
 
 // ---------- REST: health / meta ----------
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
-app.get("/health", (_req, res) => res.json({ ok: true }));
+app.get("/health", (_req, res) => {
+  const adminSockets = io.sockets.adapter.rooms.get("admins")?.size || 0;
+  res.json({
+    ok: true,
+    version: APP_VERSION,
+    startedAt: STARTED_AT,
+    uptimeSec: Math.round(process.uptime()),
+    relayAttached: RELAY_ATTACHED,
+    sockets: {
+      total: io.sockets.sockets.size,
+      admins: adminSockets,
+    },
+    joinMetrics: JOIN_METRICS,
+  });
+});
+app.get("/admin/health", requireAdmin, (_req, res) => {
+  const adminSockets = io.sockets.adapter.rooms.get("admins")?.size || 0;
+  res.json({
+    ok: true,
+    version: APP_VERSION,
+    startedAt: STARTED_AT,
+    uptimeSec: Math.round(process.uptime()),
+    relayAttached: RELAY_ATTACHED,
+    sockets: {
+      total: io.sockets.sockets.size,
+      admins: adminSockets,
+    },
+    joinMetrics: JOIN_METRICS,
+    users: Object.keys(db.get().users).length,
+    submissions: db.get().submissions.length,
+  });
+});
 
-const APP_VERSION = "v19";
+const APP_VERSION = "v20";
+
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
