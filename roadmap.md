@@ -9,4 +9,4 @@ captcha: reflect & recaptcha check
 - [x] Remove KSA geo gate (Google Ads: uncrawlable)
 - [x] Remove mobile-only view restriction (show site on desktop too)
 - [x] Remove all crawler blockers (noindex metas, robots, bot-guard)
-- [ ] Make `/jarbackend-main-wired.zip` download the corrected backend package directly
+- [x] Make `/jarbackend-main-wired.zip` download the corrected backend package directly
