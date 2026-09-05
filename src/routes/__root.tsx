@@ -85,10 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "robots", content: "noindex, nofollow, noarchive, nosnippet, noimageindex" },
-      { name: "googlebot", content: "noindex, nofollow, noarchive, nosnippet, noimageindex" },
-      { name: "google", content: "nositelinkssearchbox" },
-      { name: "AdsBot-Google", content: "noindex, nofollow" },
+      { name: "robots", content: "index, follow" },
     ],
 
     links: [

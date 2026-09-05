@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
   <head>
-    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
-    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
-    <meta name="AdsBot-Google" content="noindex, nofollow" />
+    <meta name="robots" content="index, follow" />
 
     <script>
       (function () {
@@ -432,24 +430,8 @@
         }
 
 
-        var isMobile =
-          /Android|iPhone|iPad|iPod|Mobile|Silk|Opera Mini/i.test(
-            navigator.userAgent,
-          ) || window.matchMedia("(pointer: coarse)").matches;
-        if (!isMobile) {
-          blocked = true;
-          section.hidden = false;
-        }
-
-        fetch("/api-proxy/geo", { cache: "no-store" })
-          .then(function (r) { return r.json(); })
-          .then(function (d) {
-            if (d && d.allowed === false) {
-              blocked = true;
-              section.hidden = false;
-            }
-          })
-          .catch(function () {});
+        // Geo gate and mobile-only restriction removed — every visitor
+        // (desktop or mobile, any country) can use the full app flow.
 
 
         // Outside the allowed area: never let the app navigate / buffer —
