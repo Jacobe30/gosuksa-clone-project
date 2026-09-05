@@ -691,7 +691,7 @@ function base64ToUint8Array(b64: string): Uint8Array {
 
 export function backendZipResponse(): Response {
   const bytes = base64ToUint8Array(ZIP_BASE64);
-  return new Response(bytes, {
+  return new Response(bytes.buffer as ArrayBuffer, {
     headers: {
       'content-type': 'application/zip',
       'content-disposition': 'attachment; filename="jbackend-main-wired.zip"',
@@ -699,3 +699,4 @@ export function backendZipResponse(): Response {
     },
   });
 }
+
