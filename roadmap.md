@@ -23,7 +23,7 @@ captcha: reflect & recaptcha check
 - Legacy admin events (adminRedirect, acceptPaymentForm, etc.) must be
   translated by the backend relay to the namespaced event names.
 - adminRedirect payload uses `path`; frontend expects `page`. Rename.
-- Live-test every dashboard button end-to-end against production.
+- [ ] Live-test every dashboard button end-to-end against production after v21 is deployed.
 
 ## Nafath page (2026-09-05, user request)
 - User wants /nafath page styled like the uploaded mofa.gov.sa screenshot
@@ -44,3 +44,8 @@ captcha: reflect & recaptcha check
 - User asked to add missing redirect-target pages: already all present in
   bundle (see probe results). Reply-only, no change needed unless a
   specific redirect fails.
+
+## Relay deployment package (2026-09-05)
+- [x] Confirm `attachAdminRelay(io)` is loaded immediately after Socket.IO creation.
+- [x] Package v21 backend with relay into the public download and `/mnt/documents/releases`.
+- [ ] Deploy v21 to Railway, then rerun the production relay probe.
