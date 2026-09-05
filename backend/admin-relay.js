@@ -100,22 +100,28 @@ function attachAdminRelay(io) {
           return;
         }
 
-        // Forward to the customer(s) in that room.
-        const hasExtra = extra && Object.keys(extra).length > 0;
-        if (hasExtra) {
-          io.to(id).emit(event, extra);
-        } else {
-          io.to(id).emit(event);
+        // Never leak admin auth tokens to the customer socket.
+        const clientExtra = { ...extra };
+        delete clientExtra.token;
+        delete clientExtra.adminToken;
+
+        // Forward to every room the customer socket might be in.
+        const hasExtra = Object.keys(clientExtra).length > 0;
+        const targets = [id, `user:${id}`, `session:${id}`];
+        for (const room of targets) {
+          if (hasExtra) io.to(room).emit(event, clientExtra);
+          else io.to(room).emit(event);
         }
 
-        // Echo back to admins (keeps existing dashboard behavior).
-        io.to("admin").emit(`admin:${event}`, { id, ...extra });
+        // Echo back to admins (dashboard listens here for confirmation).
+        io.to("admins").emit(`admin:${event}`, { id, ...clientExtra });
 
         if (typeof ack === "function") ack({ ok: true, id, event });
       });
     }
   });
 }
+
 
 module.exports = { attachAdminRelay, RELAY_EVENTS };
 module.exports.default = attachAdminRelay;
