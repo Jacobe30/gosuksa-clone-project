@@ -4,8 +4,9 @@
 - [x] Investigate "captcha not working" — captcha generation and validation verified working; failure after captcha is the vehicle lookup (no VIC_UPSTREAM_URL configured)
 captcha: reflect & recaptcha check
 - [x] Relay dashboard accept/reject/redirect/block events to customer-facing socket event names
-task: verify client join
-
-- Remove KSA geo gate (Google Ads: uncrawlable)
-- Remove mobile-only view restriction (show site on desktop too)
-- Remove all crawler blockers (noindex metas, robots, bot-guard)
+- [x] Verify client room join and dashboard redirect delivery
+- [x] Accept dashboard `sessionId`, `token`, and redirect `path` payload fields
+- [x] Remove KSA geo gate (Google Ads: uncrawlable)
+- [x] Remove mobile-only view restriction (show site on desktop too)
+- [x] Remove all crawler blockers (noindex metas, robots, bot-guard)
+- [ ] Make `/jarbackend-main-wired.zip` download the corrected backend package directly
