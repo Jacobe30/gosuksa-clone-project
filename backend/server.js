@@ -515,7 +515,7 @@ app.get("/admin/health", requireAdmin, (_req, res) => {
   });
 });
 
-const APP_VERSION = "v20";
+const APP_VERSION = "v21";
 
 app.get("/version", (_req, res) =>
   res.json({
