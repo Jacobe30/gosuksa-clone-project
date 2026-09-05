@@ -209,9 +209,11 @@ function clientIp(request: Request): string | null {
 export type BotDecision = {
   action: "allow" | "block";
   rule: "google-ip" | "ua-allow" | "ua-block" | "empty-ua" | "default-allow";
-  matched?: string;
-  uaFamily?: string;
-  path?: string;
+
+
+  path?: string | undefined;
+  matched?: string | undefined;
+  uaFamily?: string | undefined;
   ts: number;
 };
 
