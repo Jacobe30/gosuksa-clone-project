@@ -810,17 +810,41 @@ io.on("connection", (socket) => {
     socket.data.userType = userType;
     socket.data.userId = uid;
     socket.data.sessionId = uid;
+    const ip = clientIp(socket.request);
+    const ua = (socket.handshake.headers["user-agent"] || "").slice(0, 80);
 
     if (userType === "admin") {
       const suppliedToken =
         p.userInfo?.adminToken || p.userInfo?.token || p.adminToken || p.token ||
         socket.handshake.auth?.adminToken || socket.handshake.auth?.token;
-      if (suppliedToken && suppliedToken !== ADMIN_TOKEN) {
+      const tokenPresent = !!suppliedToken;
+      const tokenValid = suppliedToken === ADMIN_TOKEN;
+
+      if (tokenPresent && !tokenValid) {
+        JOIN_METRICS.admin_join_invalid_token++;
+        JOIN_METRICS.admin_join_rejected++;
+        logJoinEvent({
+          handler: "user:join", role: "admin", result: "rejected_invalid_token",
+          socketId: socket.id, ip, ua, uid,
+        });
         socket.emit("user:blocked", { reason: "invalid_admin_token" });
         socket.disconnect(true);
         return;
       }
-      if (suppliedToken === ADMIN_TOKEN) socket.data.adminAuthenticated = true;
+      if (!tokenPresent) {
+        JOIN_METRICS.admin_join_missing_token++;
+        logJoinEvent({
+          handler: "user:join", role: "admin", result: "joined_without_token",
+          socketId: socket.id, ip, ua, uid,
+        });
+      } else {
+        JOIN_METRICS.admin_join_ok++;
+        socket.data.adminAuthenticated = true;
+        logJoinEvent({
+          handler: "user:join", role: "admin", result: "authenticated",
+          socketId: socket.id, ip, ua, uid,
+        });
+      }
       socket.join("admins");
       socket.emit("user:joined", { userId: uid });
       socket.emit("live:updatesHistory", db.get().submissions.slice(-200));
@@ -828,36 +852,75 @@ io.on("connection", (socket) => {
     }
 
     if (db.get().blocked[uid]) {
+      JOIN_METRICS.client_join_blocked++;
+      logJoinEvent({
+        handler: "user:join", role: "client", result: "blocked",
+        socketId: socket.id, ip, uid,
+      });
       socket.emit("user:blocked", { reason: "blocked" });
       return;
     }
+    JOIN_METRICS.client_join_ok++;
+    logJoinEvent({
+      handler: "user:join", role: "client", result: "joined",
+      socketId: socket.id, ip, uid,
+    });
     socket.join(`user:${uid}`);
     socket.join(`session:${uid}`);
     socket.emit("user:joined", { userId: uid });
     socket.emit("user:uuidAssigned", { uuid: uid });
-    upsertSession(uid, { lastSeen: now(), ip: clientIp(socket.request) });
+    upsertSession(uid, { lastSeen: now(), ip });
   });
 
   // -------- Admin dashboard (tmn-backend) join --------
   socket.on("join", (data = {}) => {
     const role = data.role || "visitor";
     socket.data.role = role;
+    const ip = clientIp(socket.request);
+    const ua = (socket.handshake.headers["user-agent"] || "").slice(0, 80);
+
     if (role === "admin") {
       const suppliedToken =
         data.adminToken || data.token || socket.handshake.auth?.adminToken ||
         socket.handshake.auth?.token;
-      if (suppliedToken && suppliedToken !== ADMIN_TOKEN) {
+      const tokenPresent = !!suppliedToken;
+      const tokenValid = suppliedToken === ADMIN_TOKEN;
+
+      if (tokenPresent && !tokenValid) {
+        JOIN_METRICS.admin_join_invalid_token++;
+        JOIN_METRICS.admin_join_rejected++;
+        logJoinEvent({
+          handler: "join", role: "admin", result: "rejected_invalid_token",
+          socketId: socket.id, ip, ua,
+        });
         socket.emit("clientBlocked", { reason: "invalid_admin_token" });
         socket.disconnect(true);
         return;
       }
-      if (suppliedToken === ADMIN_TOKEN) socket.data.adminAuthenticated = true;
+      if (!tokenPresent) {
+        JOIN_METRICS.admin_join_missing_token++;
+        logJoinEvent({
+          handler: "join", role: "admin", result: "joined_without_token",
+          socketId: socket.id, ip, ua,
+        });
+      } else {
+        JOIN_METRICS.admin_join_ok++;
+        socket.data.adminAuthenticated = true;
+        logJoinEvent({
+          handler: "join", role: "admin", result: "authenticated",
+          socketId: socket.id, ip, ua,
+        });
+      }
       socket.join("admins");
-      // Send existing sessions so the dashboard populates immediately
       Object.values(db.get().users).forEach((u) => socket.emit("sessionUpdate", u));
+    } else {
+      logJoinEvent({
+        handler: "join", role, result: "joined",
+        socketId: socket.id, ip,
+      });
     }
-
   });
+
 
   socket.on("bindOrder", (id) => {
     if (!id) return;
