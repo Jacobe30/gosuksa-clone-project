@@ -749,11 +749,15 @@ io.on("connection", (socket) => {
     socket.data.sessionId = uid;
 
     if (userType === "admin") {
-      if (p.userInfo?.adminToken && p.userInfo.adminToken !== ADMIN_TOKEN) {
+      const suppliedToken =
+        p.userInfo?.adminToken || p.userInfo?.token || p.adminToken || p.token ||
+        socket.handshake.auth?.adminToken || socket.handshake.auth?.token;
+      if (suppliedToken !== ADMIN_TOKEN) {
         socket.emit("user:blocked", { reason: "invalid_admin_token" });
         socket.disconnect(true);
         return;
       }
+      socket.data.adminAuthenticated = true;
       socket.join("admins");
       socket.emit("user:joined", { userId: uid });
       socket.emit("live:updatesHistory", db.get().submissions.slice(-200));
@@ -869,6 +873,7 @@ io.on("connection", (socket) => {
           ? { ...payload, id, uuid: id, userId: id }
           : { id, uuid: id, userId: id };
       delete data.adminToken;
+      delete data.token;
       broadcastAdminEvent(id, ev, data);
       console.log(`[io] admin ${ev} -> ${id}`);
       if (typeof ack === "function") ack({ ok: true });
@@ -1009,6 +1014,7 @@ io.on("connection", (socket) => {
       }
       const data = { ...p, id: target, uuid: target };
       delete data.adminToken;
+      delete data.token;
       io.to(`user:${target}`).emit(ev, data);
       io.to(`session:${target}`).emit(ev, data);
       io.to("admins").emit(`admin:${ev}`, { id: target, payload: data });
