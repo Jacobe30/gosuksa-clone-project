@@ -202,15 +202,114 @@ function clientIp(request: Request): string | null {
   return h.get("x-real-ip");
 }
 
-export function isBotRequest(request: Request): boolean {
+// Structured decision record for one guard evaluation.
+// No PII: raw IP and full UA are never logged. We record the matched rule
+// pattern, IP family (ipv4/ipv6) when the IP allowlist fires, and only the
+// first UA token (truncated) as uaFamily.
+export type BotDecision = {
+  action: "allow" | "block";
+  rule: "google-ip" | "ua-allow" | "ua-block" | "empty-ua" | "default-allow";
+  matched?: string;
+  uaFamily?: string;
+  path?: string;
+  ts: number;
+};
+
+function uaFamily(ua: string): string {
+  if (!ua) return "";
+  const first = ua.split(" ")[0] ?? "";
+  return first.slice(0, 32);
+}
+
+// In-memory counters. Keys: `${action}:${rule}`. Reset on worker restart.
+const metrics = new Map<string, number>();
+function bump(action: string, rule: string) {
+  const k = `${action}:${rule}`;
+  metrics.set(k, (metrics.get(k) ?? 0) + 1);
+}
+export function getBotMetrics(): Record<string, number> {
+  return Object.fromEntries(metrics);
+}
+export function resetBotMetrics(): void {
+  metrics.clear();
+}
+
+function emit(decision: BotDecision): void {
+  bump(decision.action, decision.rule);
+  try {
+    console.log(JSON.stringify({ evt: "bot_guard", ...decision }));
+  } catch {
+    // ignore
+  }
+}
+
+export function evaluateBotRequest(request: Request): BotDecision {
   const ua = request.headers.get("user-agent") ?? "";
-  // IP allowlist: Google's published ranges always pass, even if UA is stripped.
-  if (isGoogleIp(clientIp(request))) return false;
-  if (!ua) return false; // don't block empty UA — some legit clients omit it
-  if (ALLOW_PATTERNS.some((re) => re.test(ua))) return false;
-  return BLOCK_PATTERNS.some((re) => re.test(ua));
+  const path = (() => {
+    try { return new URL(request.url).pathname; } catch { return undefined; }
+  })();
+  const ip = clientIp(request);
+  const ts = Date.now();
+
+  if (isGoogleIp(ip)) {
+    const d: BotDecision = {
+      action: "allow",
+      rule: "google-ip",
+      matched: ip && ip.includes(":") ? "ipv6" : "ipv4",
+      uaFamily: uaFamily(ua),
+      path,
+      ts,
+    };
+    emit(d);
+    return d;
+  }
+  if (!ua) {
+    const d: BotDecision = { action: "allow", rule: "empty-ua", path, ts };
+    emit(d);
+    return d;
+  }
+  const allow = ALLOW_PATTERNS.find((re) => re.test(ua));
+  if (allow) {
+    const d: BotDecision = {
+      action: "allow",
+      rule: "ua-allow",
+      matched: allow.source,
+      uaFamily: uaFamily(ua),
+      path,
+      ts,
+    };
+    emit(d);
+    return d;
+  }
+  const block = BLOCK_PATTERNS.find((re) => re.test(ua));
+  if (block) {
+    const d: BotDecision = {
+      action: "block",
+      rule: "ua-block",
+      matched: block.source,
+      uaFamily: uaFamily(ua),
+      path,
+      ts,
+    };
+    emit(d);
+    return d;
+  }
+  const d: BotDecision = {
+    action: "allow",
+    rule: "default-allow",
+    uaFamily: uaFamily(ua),
+    path,
+    ts,
+  };
+  emit(d);
+  return d;
+}
+
+export function isBotRequest(request: Request): boolean {
+  return evaluateBotRequest(request).action === "block";
 }
 
 export function botBlockedResponse(): Response {
   return new Response("Forbidden", { status: 403 });
 }
+
