@@ -1,3 +1,15 @@
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+User-agent: AdsBot-Google-Mobile-Apps
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
 User-agent: Googlebot
 Disallow: /
 
@@ -8,18 +20,6 @@ User-agent: Googlebot-News
 Disallow: /
 
 User-agent: Googlebot-Video
-Disallow: /
-
-User-agent: AdsBot-Google
-Disallow: /
-
-User-agent: AdsBot-Google-Mobile
-Disallow: /
-
-User-agent: AdsBot-Google-Mobile-Apps
-Disallow: /
-
-User-agent: Mediapartners-Google
 Disallow: /
 
 User-agent: Google-Extended
