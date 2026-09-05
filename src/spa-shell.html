@@ -606,6 +606,99 @@
 
       })();
     </script>
+    <script>
+      // Focus & scroll to the first invalid / empty required field when the
+      // user presses a "next / submit / continue" button but nothing happens.
+      (function () {
+        var HIGHLIGHT_CLASS = "__gs_invalid_hl";
+        var style = document.createElement("style");
+        style.textContent =
+          "." + HIGHLIGHT_CLASS +
+          "{outline:2px solid #e11d48 !important;outline-offset:2px !important;" +
+          "box-shadow:0 0 0 4px rgba(225,29,72,.15) !important;" +
+          "border-color:#e11d48 !important;transition:outline-color .2s;}";
+        document.head.appendChild(style);
+
+        function isVisible(el) {
+          if (!el || !el.getBoundingClientRect) return false;
+          var r = el.getBoundingClientRect();
+          if (r.width === 0 && r.height === 0) return false;
+          var s = window.getComputedStyle(el);
+          return s.display !== "none" && s.visibility !== "hidden" && s.opacity !== "0";
+        }
+
+        function fieldIsEmpty(el) {
+          if (el.type === "checkbox" || el.type === "radio") {
+            if (!el.required) return false;
+            if (el.type === "radio" && el.name) {
+              var group = document.querySelectorAll(
+                'input[type=radio][name="' + el.name.replace(/"/g, '\\"') + '"]'
+              );
+              for (var i = 0; i < group.length; i++) if (group[i].checked) return false;
+              return true;
+            }
+            return !el.checked;
+          }
+          return !el.value || !String(el.value).trim();
+        }
+
+        function findFirstInvalid(root) {
+          root = root || document;
+          var marked = root.querySelectorAll(
+            '[aria-invalid="true"],.error,.is-invalid,.invalid,[data-invalid="true"]'
+          );
+          for (var i = 0; i < marked.length; i++) if (isVisible(marked[i])) return marked[i];
+
+          var controls = root.querySelectorAll("input, select, textarea");
+          for (var j = 0; j < controls.length; j++) {
+            var c = controls[j];
+            if (c.type === "hidden" || c.disabled || c.readOnly) continue;
+            if (!isVisible(c)) continue;
+            if (typeof c.checkValidity === "function" && !c.checkValidity()) return c;
+          }
+          for (var k = 0; k < controls.length; k++) {
+            var f = controls[k];
+            if (f.type === "hidden" || f.disabled || f.readOnly) continue;
+            if (!isVisible(f)) continue;
+            if ((f.required || f.getAttribute("aria-required") === "true") && fieldIsEmpty(f)) return f;
+          }
+          return null;
+        }
+
+        function highlight(el) {
+          if (!el) return;
+          try { if (typeof el.focus === "function") el.focus({ preventScroll: false }); } catch (e) {}
+          try { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+          catch (e) { el.scrollIntoView(); }
+          el.classList.add(HIGHLIGHT_CLASS);
+          setTimeout(function () { el.classList.remove(HIGHLIGHT_CLASS); }, 2500);
+        }
+
+        function looksLikeNextButton(node) {
+          if (!node || node.disabled) return false;
+          var txt = (node.innerText || node.textContent || node.value || "").trim();
+          if (!txt) return false;
+          return /التالي|متابعة|تاكيد|تأكيد|ارسال|إرسال|اشتر|احصل|تسجيل|دفع|موافق|اكمل|أكمل|إكمال|next|continue|submit|confirm|pay|send|proceed|verify/i.test(txt);
+        }
+
+        function handle(e) {
+          var btn = e.target.closest
+            ? e.target.closest('button, [role="button"], input[type="submit"], input[type="button"], a')
+            : null;
+          if (!btn || !looksLikeNextButton(btn)) return;
+          setTimeout(function () { var bad = findFirstInvalid(document); if (bad) highlight(bad); }, 120);
+          setTimeout(function () { var bad = findFirstInvalid(document); if (bad) highlight(bad); }, 500);
+        }
+
+        document.addEventListener("click", handle, true);
+        document.addEventListener("submit", function (e) {
+          setTimeout(function () {
+            var bad = findFirstInvalid(e.target || document);
+            if (bad) highlight(bad);
+          }, 60);
+        }, true);
+      })();
+    </script>
   </body>
 </html>
 
