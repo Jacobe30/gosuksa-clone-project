@@ -142,6 +142,7 @@ function ipv4ToInt(ip: string): number | null {
 }
 function ipv4InCidr(ip: string, cidr: string): boolean {
   const [range, bitsStr] = cidr.split("/");
+  if (!range || !bitsStr) return false;
   const bits = Number(bitsStr);
   const ipN = ipv4ToInt(ip);
   const rangeN = ipv4ToInt(range);
@@ -153,7 +154,7 @@ function ipv4InCidr(ip: string, cidr: string): boolean {
 function ipv6ToBytes(ip: string): Uint8Array | null {
   const [head, tail] = ip.split("::");
   const h = head ? head.split(":") : [];
-  const t = tail ? tail.split(":") : [];
+  const t = tail !== undefined ? tail.split(":") : [];
   const missing = 8 - (h.length + t.length);
   if (missing < 0) return null;
   const parts = [...h, ...Array(missing).fill("0"), ...t];
@@ -168,6 +169,7 @@ function ipv6ToBytes(ip: string): Uint8Array | null {
 }
 function ipv6InCidr(ip: string, cidr: string): boolean {
   const [range, bitsStr] = cidr.split("/");
+  if (!range || !bitsStr) return false;
   const bits = Number(bitsStr);
   const ipB = ipv6ToBytes(ip);
   const rangeB = ipv6ToBytes(range);
@@ -177,10 +179,11 @@ function ipv6InCidr(ip: string, cidr: string): boolean {
   for (let i = 0; i < full; i++) if (ipB[i] !== rangeB[i]) return false;
   if (rem) {
     const mask = (0xff << (8 - rem)) & 0xff;
-    if ((ipB[full] & mask) !== (rangeB[full] & mask)) return false;
+    if ((ipB[full]! & mask) !== (rangeB[full]! & mask)) return false;
   }
   return true;
 }
+
 
 export function isGoogleIp(ip: string | null | undefined): boolean {
   if (!ip) return false;
