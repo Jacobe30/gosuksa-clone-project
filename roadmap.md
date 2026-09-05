@@ -14,3 +14,13 @@ captcha: reflect & recaptcha check
 - [x] Backend health endpoints (/health public, /admin/health protected) showing relay + admin socket status
 - [x] Fix redirect button → dashboard offline (admin-relay wrong "admin" echo room, missing session:/user: rooms, token leak stripped)
 - [x] Deploy hardened bot guard with all Google IPs + UAs whitelisted
+
+## Step-action redirect verification (2026-09-05)
+- Frontend bundle listens for namespaced events only:
+  admin:redirect { page, pageName }, payment:action, otp:action,
+  phone:action, nafath:action, nafath:code, naflogin:action,
+  rajlogin:action, user:blocked.
+- Legacy admin events (adminRedirect, acceptPaymentForm, etc.) must be
+  translated by the backend relay to the namespaced event names.
+- adminRedirect payload uses `path`; frontend expects `page`. Rename.
+- Live-test every dashboard button end-to-end against production.
