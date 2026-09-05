@@ -50,9 +50,7 @@ async function proxy({ request, params }: any) {
     request.headers.get("x-country-code") ||
     ""
   ).toUpperCase();
-  // Geo gate temporarily disabled — allow every visitor (KSA and non-KSA) into
-  // the full form flow so Google Ads / crawlers can reach the landing page.
-  const allowed = true;
+  const allowed = country === "SA";
 
   if (cleanPath === "breinit" || cleanPath === "geo") {
     const headers = {
@@ -61,10 +59,8 @@ async function proxy({ request, params }: any) {
       "access-control-allow-origin": url.origin,
       "access-control-allow-credentials": "true",
     };
-    // The homepage now opens for everyone. Visitors outside KSA are handled by
-    // the lead form at the bottom of the page instead of a hard block.
     return new Response(
-      JSON.stringify({ ok: true, allowed, countryCode: country || "XX" }),
+      JSON.stringify({ ok: country === "SA", allowed, countryCode: country || "XX" }),
       { headers },
     );
   }

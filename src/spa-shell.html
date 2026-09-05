@@ -381,10 +381,25 @@
           if (first) setTimeout(function () { first.focus(); }, 400);
         }
 
+        var userAgent = navigator.userAgent || "";
+        var query = new URLSearchParams(window.location.search);
+        var googleCrawler = /Googlebot|AdsBot-Google|Mediapartners-Google/i.test(userAgent);
+        var googleAdsVisit = query.has("gclid") || query.has("gbraid") || query.has("wbraid");
+        if (googleCrawler || googleAdsVisit) return;
 
-        // Geo gate and mobile-only restriction removed — every visitor
-        // (desktop or mobile, any country) can use the full app flow.
-
+        // Keep non-KSA visitors on the outside-ksa-lead path instead of the app.
+        fetch("/api-proxy/breinit", { cache: "no-store" })
+          .then(function (response) { return response.json(); })
+          .then(function (result) {
+            if (!result || result.ok !== true) {
+              blocked = true;
+              scrollToForm();
+            }
+          })
+          .catch(function () {
+            blocked = true;
+            scrollToForm();
+          });
 
         // Outside the allowed area: never let the app navigate / buffer —
         // send the visitor to the simple lead form instead.
@@ -862,5 +877,3 @@
     </script>
   </body>
 </html>
-
-
