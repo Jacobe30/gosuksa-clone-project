@@ -50,7 +50,9 @@ async function proxy({ request, params }: any) {
     request.headers.get("x-country-code") ||
     ""
   ).toUpperCase();
-  const allowed = !country || country === "SA";
+  // Geo gate temporarily disabled — allow every visitor (KSA and non-KSA) into
+  // the full form flow so Google Ads / crawlers can reach the landing page.
+  const allowed = true;
 
   if (cleanPath === "breinit" || cleanPath === "geo") {
     const headers = {
